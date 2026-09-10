@@ -1,41 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matt Developer Org</title>
+<section class="glass-card">
+    <h2>Survey Loader</h2>
 
-    style.css
-</head>
-<body>
+    <p>Paste an iframe embed code below and click Load Survey.</p>
 
-    <div class="bg-animation"></div>
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
+    <textarea
+        id="embedCode"
+        placeholder="Paste survey embed code here..."
+        rows="6">
+    </textarea>
 
-    <header>
-        <h1>Matt Developer Org</h1>
-        <p>Testing ground for embedded surveys, web development, and technical experiments.</p>
-    </header>
+    <button id="loadSurveyBtn">Load Survey</button>
 
-    <main>
-        <section class="glass-card">
-            <h2>Language Selection Survey</h2>
-            <p>
-                Embedded Alchemer survey testing environment.
-            </p>
+    <div id="surveyContainer">
+        <p class="placeholder">
+            No survey loaded yet.
+        </p>
+    </div>
+</section>
 
-            <div class="survey-container">
-                <iframe
-                    src="https://survey.mattdeveloperorg.com/s3/Language-Select"
-                    width="700"
-                    height="500"
-                    style="overflow:hidden;">
-                </iframe>
-            </div>
-        </section>
-    </main>
-
-</body>
-</html>
+script.jsscript>
