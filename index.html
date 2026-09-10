@@ -1,21 +1,89 @@
-<section class="glass-card">
-    <h2>Survey Loader</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matt Developer Org</title>
 
-    <p>Paste an iframe embed code below and click Load Survey.</p>
+    style.css
+</head>
+<body>
 
-    <textarea
-        id="embedCode"
-        placeholder="Paste survey embed code here..."
-        rows="6">
-    </textarea>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
 
-    <button id="loadSurveyBtn">Load Survey</button>
+    <header>
+        <h1>Matt Developer Org</h1>
+        <p>Testing ground for embedded surveys, web development, and technical experiments.</p>
+    </header>
 
-    <div id="surveyContainer">
-        <p class="placeholder">
-            No survey loaded yet.
-        </p>
-    </div>
-</section>
+    <main>
+        <section class="glass-card">
+            <h2>Survey Loader</h2>
 
-script.jsscript>
+            <p>
+                Paste your survey embed code below and click Load Survey.
+                The last loaded survey is automatically saved in your browser.
+            </p>
+
+            <textarea
+                id="embedCode"
+                rows="8"
+                placeholder="Paste your survey embed code here..."></textarea>
+
+            <div class="button-group">
+                <button id="loadSurveyBtn">Load Survey</button>
+                <button id="clearSurveyBtn">Clear</button>
+            </div>
+
+            <div id="surveyContainer">
+                <div class="placeholder">
+                    <h3>No Survey Loaded</h3>
+                    <p>Paste an embed code above to begin.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const textarea = document.getElementById("embedCode");
+        const loadBtn = document.getElementById("loadSurveyBtn");
+        const clearBtn = document.getElementById("clearSurveyBtn");
+        const container = document.getElementById("surveyContainer");
+
+        const savedEmbed = localStorage.getItem("surveyEmbed");
+
+        if (savedEmbed) {
+            textarea.value = savedEmbed;
+            container.innerHTML = savedEmbed;
+        }
+
+        loadBtn.addEventListener("click", () => {
+            const embedCode = textarea.value.trim();
+
+            if (!embedCode) {
+                alert("Please paste an embed code.");
+                return;
+            }
+
+            container.innerHTML = embedCode;
+            localStorage.setItem("surveyEmbed", embedCode);
+        });
+
+        clearBtn.addEventListener("click", () => {
+            textarea.value = "";
+
+            container.innerHTML = `
+                <div class="placeholder">
+                    <h3>No Survey Loaded</h3>
+                    <p>Paste an embed code above to begin.</p>
+                </div>
+            `;
+
+            localStorage.removeItem("surveyEmbed");
+        });
+    </script>
+
+</body>
+</html>
