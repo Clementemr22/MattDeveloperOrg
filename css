@@ -186,3 +186,64 @@ iframe {
         padding: 1.5rem;
     }
 }
+
+textarea {
+    width: 100%;
+    min-height: 120px;
+    margin-top: 1rem;
+    padding: 1rem;
+
+    background: rgba(255,255,255,0.08);
+    color: white;
+
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+
+    resize: vertical;
+    font-family: inherit;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 15px rgba(96,165,250,.4);
+}
+
+button {
+    margin-top: 1rem;
+    padding: .8rem 1.5rem;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    background: linear-gradient(
+        135deg,
+        #60a5fa,
+        #8b5cf6
+    );
+
+    color: white;
+
+    transition: all .3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(96,165,250,.5);
+}
+
+#surveyContainer {
+    margin-top: 2rem;
+    min-height: 500px;
+}
+
+.placeholder {
+    opacity: 0.7;
+    text-align: center;
+    padding: 3rem;
+}
