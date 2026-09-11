@@ -1,4 +1,4 @@
-/* ---------- Base ---------- */
+/* ---------- Reset ---------- */
 
 * {
     margin: 0;
@@ -6,31 +6,33 @@
     box-sizing: border-box;
 }
 
+/* ---------- Animated Background ---------- */
+
 body {
     min-height: 100vh;
     font-family: "Segoe UI", sans-serif;
-    color: white;
     overflow-x: hidden;
+
     background: linear-gradient(
         -45deg,
-        #0f172a,
-        #1e1b4b,
-        #312e81,
-        #0f172a
+        #5a2400,
+        #7a3100,
+        #a84700,
+        #6b2a00
     );
     background-size: 400% 400%;
-    animation: gradientFlow 15s ease infinite;
+    animation: gradientFlow 25s ease infinite;
 }
-
-/* ---------- Animated Background ---------- */
 
 @keyframes gradientFlow {
     0% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
+
     100% {
         background-position: 0% 50%;
     }
@@ -40,7 +42,7 @@ body {
     position: fixed;
     border-radius: 50%;
     filter: blur(100px);
-    opacity: 0.4;
+    opacity: 0.35;
     z-index: -1;
     animation: float 15s ease-in-out infinite;
 }
@@ -48,7 +50,7 @@ body {
 .orb1 {
     width: 400px;
     height: 400px;
-    background: #00d4ff;
+    background: #ff7a18;
     top: -120px;
     left: -120px;
 }
@@ -56,7 +58,7 @@ body {
 .orb2 {
     width: 500px;
     height: 500px;
-    background: #8b5cf6;
+    background: #ff9f1c;
     top: 20%;
     right: -150px;
 }
@@ -64,15 +66,17 @@ body {
 .orb3 {
     width: 350px;
     height: 350px;
-    background: #ec4899;
+    background: #ffd166;
     bottom: -100px;
     left: 30%;
 }
 
 @keyframes float {
-    0%,100% {
-        transform: translateY(0px);
+    0%,
+    100% {
+        transform: translateY(0);
     }
+
     50% {
         transform: translateY(40px);
     }
@@ -88,91 +92,172 @@ header {
 header h1 {
     font-size: 4rem;
     font-weight: 800;
+
     background: linear-gradient(
         90deg,
-        #60a5fa,
-        #c084fc,
-        #f472b6
+        #ffb347,
+        #ff8c42,
+        #ff6b35
     );
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    text-shadow:
-        0 0 30px rgba(96, 165, 250, .4);
+    text-shadow: 0 0 25px rgba(255, 140, 66, 0.4);
 }
 
 header p {
     margin-top: 1rem;
     font-size: 1.2rem;
-    color: rgba(255,255,255,.75);
+    color: rgba(255, 255, 255, 0.85);
 }
 
-/* ---------- Main ---------- */
+/* ---------- Main Content ---------- */
 
 main {
     max-width: 1100px;
-    margin: 0 auto;
+    margin: 2rem auto;
     padding: 2rem;
+
+    background: #faf8f4;
+    border-radius: 32px;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
 
-/* ---------- Glass Card ---------- */
+/* ---------- Cards ---------- */
 
 .glass-card {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-
-    border: 1px solid rgba(255,255,255,0.15);
-
-    border-radius: 24px;
     padding: 2rem;
+    border-radius: 24px;
+
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 
     box-shadow:
-        0 8px 32px rgba(0,0,0,0.3),
-        0 0 40px rgba(99,102,241,0.15);
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        0 0 40px rgba(255, 122, 24, 0.12);
 
-    transition: all .3s ease;
+    color: #333;
+    transition: all 0.3s ease;
 }
 
 .glass-card:hover {
     transform: translateY(-5px);
 
     box-shadow:
-        0 15px 45px rgba(0,0,0,.4),
-        0 0 60px rgba(99,102,241,.3);
+        0 15px 45px rgba(0, 0, 0, 0.12),
+        0 0 50px rgba(255, 122, 24, 0.2);
 }
 
 .glass-card h2 {
-    font-size: 2rem;
     margin-bottom: 1rem;
+    font-size: 2rem;
+    color: #2d2d2d;
 }
 
 .glass-card p {
-    color: rgba(255,255,255,.75);
+    color: #555;
 }
 
 /* ---------- Survey ---------- */
 
 .survey-container {
-    margin-top: 2rem;
     display: flex;
     justify-content: center;
+    margin-top: 2rem;
 }
 
-iframe {
+iframe,
+#surveyContainer iframe {
+    max-width: 100%;
     border: none;
     border-radius: 18px;
-    background: white;
+    background: #fff;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.08);
+}
 
-    box-shadow:
-        0 0 25px rgba(255,255,255,.1);
+#surveyContainer {
+    margin-top: 2rem;
+    min-height: 550px;
+}
+
+/* ---------- Form Elements ---------- */
+
+textarea {
+    width: 100%;
+    min-height: 160px;
+    margin-top: 1rem;
+    padding: 1rem;
+
+    resize: vertical;
+
+    font-family: Consolas, Monaco, monospace;
+    font-size: 14px;
+
+    color: #333;
+    background: rgba(255, 255, 255, 0.85);
+
+    border: 1px solid rgba(255, 140, 66, 0.2);
+    border-radius: 16px;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #ff8c42;
+    box-shadow: 0 0 20px rgba(255, 140, 66, 0.25);
+}
+
+/* ---------- Buttons ---------- */
+
+.button-group {
+    margin-top: 1rem;
+}
+
+button {
+    padding: 0.9rem 1.5rem;
+    margin-right: 1rem;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    color: #fff;
+    font-weight: 600;
+
+    background: linear-gradient(
+        135deg,
+        #ff8c42,
+        #ff6b35
+    );
+
+    transition: all 0.25s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(255, 140, 66, 0.45);
+}
+
+/* ---------- Placeholder ---------- */
+
+.placeholder {
+    padding: 4rem 2rem;
+    text-align: center;
+
+    color: #666;
+
+    border: 2px dashed rgba(255, 140, 66, 0.2);
+    border-radius: 20px;
 }
 
 /* ---------- Mobile ---------- */
 
-@media(max-width:768px) {
-
+@media (max-width: 768px) {
     header h1 {
         font-size: 2.5rem;
     }
@@ -185,84 +270,9 @@ iframe {
     .glass-card {
         padding: 1.5rem;
     }
+
+    main {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
 }
-
-textarea {
-    width: 100%;
-    min-height: 160px;
-    margin-top: 1rem;
-    padding: 1rem;
-
-    border: 1px solid rgba(255,255,255,.15);
-    border-radius: 16px;
-
-    background: rgba(255,255,255,.08);
-    color: white;
-
-    font-family: Consolas, Monaco, monospace;
-    font-size: 14px;
-
-    resize: vertical;
-}
-
-textarea:focus {
-    outline: none;
-    border-color: #60a5fa;
-
-    box-shadow:
-        0 0 20px rgba(96,165,250,.25);
-}
-
-.button-group {
-    margin-top: 1rem;
-}
-
-button {
-    padding: .9rem 1.5rem;
-    margin-right: 1rem;
-
-    border: none;
-    border-radius: 12px;
-
-    cursor: pointer;
-
-    color: white;
-    font-weight: 600;
-
-    background: linear-gradient(
-        135deg,
-        #60a5fa,
-        #8b5cf6
-    );
-
-    transition: all .25s ease;
-}
-
-button:hover {
-    transform: translateY(-2px);
-
-    box-shadow:
-        0 0 25px rgba(96,165,250,.4);
-}
-
-#surveyContainer {
-    margin-top: 2rem;
-    min-height: 550px;
-}
-
-#surveyContainer iframe {
-    max-width: 100%;
-    border-radius: 16px;
-}
-
-.placeholder {
-    text-align: center;
-    padding: 4rem 2rem;
-
-    border: 2px dashed rgba(255,255,255,.15);
-    border-radius: 20px;
-
-    color: rgba(255,255,255,.7);
-}
-
-
