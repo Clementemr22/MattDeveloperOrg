@@ -1,54 +1,133 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matt Developer Org</title>
 
-    <link rel="stylesheet" href="style.css">
+```
+<link rel="stylesheet" href="style.css">
+```
+
 </head>
 <body>
 
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
+```
+<header class="site-header">
+    <div class="header-content">
+        <div>
+            <h1>Matt Developer Org</h1>
+            <p>Testing Environment</p>
+        </div>
 
-    <header>
-        <h1>Matt Developer Org</h1>
-        <p>survey testing ground</p>
-    </header>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#testing">Testing</a>
+            <a href="#about">About</a>
+        </nav>
+    </div>
+</header>
 
-    <main>
-        <section class="glass-card">
-            <h2>Survey Loader</h2>
+<main>
 
+    <section id="home" class="hero">
+        <p class="eyebrow">DEVELOPMENT & TESTING</p>
+
+        <h2>Survey Testing Environment</h2>
+
+        <p>
+            Welcome to the testing environment for Matt Developer Org.
+            This site is used to preview, test, and evaluate surveys
+            and other interactive web content before deployment.
+        </p>
+    </section>
+
+    <section id="testing" class="content-section">
+
+        <div class="section-header">
+            <h2>Testing Area</h2>
             <p>
-                Paste your survey embed code below and click Load Survey.
-                The last loaded survey is automatically saved in your browser.
+                This area contains embedded content currently being tested.
+                Survey content can be added directly to this page.
             </p>
+        </div>
 
-            <textarea
-                id="embedCode"
-                rows="8"
-                placeholder="Paste your survey embed code here..."></textarea>
+        <div class="test-card">
 
-            <div class="button-group">
-                <button id="loadSurveyBtn">Load Survey</button>
-                <button id="clearSurveyBtn">Clear</button>
-            </div>
-
-            <div id="surveyContainer">
-                <div class="placeholder">
-                    <h3>No Survey Loaded</h3>
-                    <p>Paste an embed code above to begin.</p>
+            <div class="test-card-header">
+                <div>
+                    <h3>Survey Preview</h3>
+                    <p>Embedded survey testing area</p>
                 </div>
-            </div>
-        </section>
-    </main>
 
-    <script src="script.js"></script>
-</body>
-</html>
+                <span class="status">Testing</span>
+            </div>
+
+            <div class="survey-area">
+
+                <!--
+                Paste your survey embed code here.
+                Example:
+
+                <script>
+                    YOUR SURVEY EMBED CODE
+                </script>
+                -->
+
+                <div class="empty-state">
+                    <h4>No Survey Currently Embedded</h4>
+                    <p>
+                        Add your survey embed code to the HTML
+                        to display it in this area.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section id="about" class="content-section">
+
+        <div class="info-grid">
+
+            <div class="info-card">
+                <h3>Purpose</h3>
+                <p>
+                    This website provides a simple environment for
+                    testing surveys, forms, and interactive content
+                    during development.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>Environment</h3>
+                <p>
+                    Content displayed here is for development and
+                    testing purposes and may change frequently.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>Status</h3>
+                <p>
+                    The testing environment is currently available
+                    for previewing embedded content.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>Matt Developer Org · Development & Testing Environment</p>
+</footer>
+```
 
 </body>
 </html>
