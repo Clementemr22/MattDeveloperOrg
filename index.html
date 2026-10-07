@@ -1,136 +1,182 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matt Developer Org</title>
 
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="Logo.ico" type="image/x-icon" />
 
-<link rel="stylesheet" href="style.css">
+    <!-- Alchemer Web SDK -->
+    <script>
+        (function initApptentiveSDK() {
+            var ApptentiveSDK = window.ApptentiveSDK = window.ApptentiveSDK || [];
 
-<link rel="shortcut icon" href="Logo.ico" type="image/x-icon"/>
+            if (!ApptentiveSDK.version) {
+                if (!ApptentiveSDK.loaded) {
+                    ApptentiveSDK.loaded = true;
 
+                    ApptentiveSDK.methods = [
+                        "buildDevice",
+                        "createConversation",
+                        "createMessage",
+                        "engage",
+                        "getSegments",
+                        "identifyPerson",
+                        "setOption",
+                        "setPageName",
+                        "showInteraction",
+                        "showMessageCenter",
+                        "updatePerson"
+                    ];
+
+                    ApptentiveSDK.factory = function (t) {
+                        return function () {
+                            var args = Array.prototype.slice.call(arguments);
+                            args.unshift(t);
+                            ApptentiveSDK.push(args);
+                            return ApptentiveSDK;
+                        };
+                    };
+
+                    for (var i = 0; i < ApptentiveSDK.methods.length; i++) {
+                        var method = ApptentiveSDK.methods[i];
+                        ApptentiveSDK[method] = ApptentiveSDK.factory(method);
+                    }
+
+                    ApptentiveSDK.LOADER_VERSION = "1.0.0";
+                }
+            }
+        })();
+    </script>
+
+    <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk"></script>
 </head>
+
 <body>
 
-<header class="site-header">
-    <div class="header-content">
-        <div>
-            <h1>Matt Developer Org</h1>
-            <p>Testing Environment</p>
+    <header class="site-header">
+        <div class="header-content">
+            <div>
+                <h1>Matt Developer Org</h1>
+                <p>Testing Environment</p>
+            </div>
+
+            <nav>
+                #homeHome</a>
+                #testingTesting</a>
+                #aboutAbout</a>
+            </nav>
         </div>
+    </header>
 
-        <nav>
-            <a href="#home">Home</a>
-            <a href="#testing">Testing</a>
-            <a href="#about">About</a>
-        </nav>
-    </div>
-</header>
+    <main>
 
-<main>
+        <section id="home" class="hero">
+            <p class="eyebrow">DEVELOPMENT & TESTING</p>
 
-    <section id="home" class="hero">
-        <p class="eyebrow">DEVELOPMENT & TESTING</p>
+            <h2>Survey Testing Environment</h2>
 
-        <h2>Survey Testing Environment</h2>
-
-        <p>
-            Welcome to the testing environment for Matt Developer Org.
-            This site is used to preview, test, and evaluate surveys
-            and other interactive web content before deployment.
-        </p>
-    </section>
-
-    <section id="testing" class="content-section">
-
-        <div class="section-header">
-            <h2>Testing Area</h2>
             <p>
-                This area contains embedded content currently being tested.
-                Survey content can be added directly to this page.
+                Welcome to the testing environment for Matt Developer Org.
+                This site is used to preview, test, and evaluate surveys
+                and other interactive web content before deployment.
             </p>
-        </div>
+        </section>
 
-        <div class="test-card">
+        <section id="testing" class="content-section">
 
-            <div class="test-card-header">
-                <div>
-                    <h3>Survey Preview</h3>
-                    <p>Embedded survey testing area</p>
+            <div class="section-header">
+                <h2>Testing Area</h2>
+                <p>
+                    This area contains embedded content currently being tested.
+                    Survey content can be added directly to this page.
+                </p>
+            </div>
+
+            <div class="test-card">
+
+                <div class="test-card-header">
+                    <div>
+                        <h3>Survey Preview</h3>
+                        <p>Embedded survey testing area</p>
+                    </div>
+
+                    <span class="status">Testing</span>
                 </div>
 
-                <span class="status">Testing</span>
+                <div class="survey-area">
+
+                    <iframe
+                        src="https://survey.alchemer.com/s3/9036582/Alchemer-Survey"
+                        frameborder="0"
+                        width="700"
+                        height="500"
+                        style="overflow:hidden">
+                    </iframe>
+
+                </div>
+
             </div>
 
-            <div class="survey-area">
+        </section>
 
-                <!--
-                Paste your survey embed code here.
-                Example:
+        <section id="about" class="content-section">
 
-                <script>
-                    YOUR SURVEY EMBED CODE
-                </script>
-                -->
-                <!-- This embed code may be restricted to use on a single domain, see documentation at: https://help.alchemer.com/help/iframe-embed#limit-permitted-domains-for-embeds -->
-<!-- This embed code may be restricted to use on a single domain, see documentation at: https://help.alchemer.com/help/iframe-embed#limit-permitted-domains-for-embeds -->
-<iframe src="https://survey.alchemer.com/s3/9036582/Alchemer-Survey" frameborder="0" width="700" height="500" style="overflow:hidden"></iframe>
-                <!-- <div class="empty-state">
-                    
-                    <h4>No Survey Currently Embedded</h4>
+            <div class="info-grid">
+
+                <div class="info-card">
+                    <h3>Purpose</h3>
                     <p>
-                        Add your survey embed code to the HTML
-                        to display it in this area.
+                        This website provides a simple environment for
+                        testing surveys, forms, and interactive content
+                        during development.
                     </p>
-                </div> -->
+                </div>
+
+                <div class="info-card">
+                    <h3>Environment</h3>
+                    <p>
+                        Content displayed here is for development and
+                        testing purposes and may change frequently.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>Status</h3>
+                    <p>
+                        The testing environment is currently available
+                        for previewing embedded content.
+                    </p>
+                </div>
 
             </div>
 
-        </div>
+        </section>
 
-    </section>
+    </main>
 
-    <section id="about" class="content-section">
+    <footer>
+        <p>Matt Developer Org · Development & Testing Environment</p>
+    </footer>
 
-        <div class="info-grid">
+    <!-- Alchemer Initialization -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
 
-            <div class="info-card">
-                <h3>Purpose</h3>
-                <p>
-                    This website provides a simple environment for
-                    testing surveys, forms, and interactive content
-                    during development.
-                </p>
-            </div>
+            // Create an anonymous conversation
+            ApptentiveSDK.createConversation();
 
-            <div class="info-card">
-                <h3>Environment</h3>
-                <p>
-                    Content displayed here is for development and
-                    testing purposes and may change frequently.
-                </p>
-            </div>
+            // Trigger an event that can launch interactions
+            ApptentiveSDK.engage("site-loaded");
 
-            <div class="info-card">
-                <h3>Status</h3>
-                <p>
-                    The testing environment is currently available
-                    for previewing embedded content.
-                </p>
-            </div>
-
-        </div>
-
-    </section>
-
-</main>
-
-<footer>
-    <p>Matt Developer Org · Development & Testing Environment</p>
-</footer>
-
+            console.log("Alchemer conversation created");
+            console.log("Event sent: site-loaded");
+        });
+    </script>
 
 </body>
+
 </html>
