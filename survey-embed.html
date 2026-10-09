@@ -1,171 +1,159 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Testing Website - Survey Embed Testing</title>
 
-    styles.css
+    <link rel="stylesheet" href="./styles.css">
 
-    https://api.alchemer.com/head/surveyjsscript>
+    <script src="https://api.alchemer.com/head/surveyjsscript"></script>
 </head>
 
 <body>
-
     <div class="container">
 
         <nav class="card">
-            <a href="index.html">SDK Testing</a> |
-            <a href="survey-embed.html">Survey Embed Testing</a>
+            <a href="./index.html">SDK Testing</a>
+            |
+            <a href="./survey-embed.html">Survey Embed Testing</a>
         </nav>
 
-        <h1>Testing Website</h1>
+        <header>
+            <h1>Testing Website</h1>
 
-        <p class="subtitle">
-            Survey Embed Testing
-        </p>
+            <p class="subtitle">
+                Survey Embed Testing
+            </p>
+        </header>
 
-        <div class="card">
+        <main>
+            <section class="card">
+                <h2>Load Survey</h2>
 
-            <h2>Load Survey</h2>
+                <input
+                    id="surveyId"
+                    type="text"
+                    placeholder="Enter Survey ID"
+                >
 
-            <input
-                id="surveyId"
-                type="text"
-                placeholder="Enter Survey ID">
-
-            <button onclick="loadSurvey()">
-                Load Survey
-            </button>
-
-        </div>
-
-        <div class="card">
-
-            <h2>Actions</h2>
-
-            <div class="button-grid">
-
-                <button onclick="reloadSurvey()">
-                    Reload Survey
+                <button onclick="loadSurvey()">
+                    Load Survey
                 </button>
+            </section>
 
-                <button onclick="clearSurvey()">
-                    Clear Survey
-                </button>
+            <section class="card">
+                <h2>Actions</h2>
 
-            </div>
+                <div class="button-grid">
+                    <button onclick="reloadSurvey()">
+                        Reload Survey
+                    </button>
 
-        </div>
-
-        <div class="card">
-
-            <h2>Embed Area</h2>
-
-            <div id="surveyContainer">
-                Survey will load here.
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <h2>Activity Log</h2>
-
-            <div id="eventHistory">
-
-                <div class="event-entry">
-                    Waiting for survey...
+                    <button onclick="clearSurvey()">
+                        Clear Survey
+                    </button>
                 </div>
+            </section>
 
-            </div>
+            <section class="card">
+                <h2>Embed Area</h2>
 
-        </div>
+                <div id="surveyContainer">
+                    Survey will load here.
+                </div>
+            </section>
 
+            <section class="card">
+                <h2>Activity Log</h2>
+
+                <div id="eventHistory">
+                    <div class="event-entry">
+                        Waiting for survey...
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script>
-
         let currentSurveyId = "";
 
         function loadSurvey() {
+            const surveyIdInput = document.getElementById("surveyId");
 
-            currentSurveyId =
-                document.getElementById("surveyId")
-                    .value
-                    .trim();
+            currentSurveyId = surveyIdInput.value.trim();
 
             if (!currentSurveyId) {
+                addHistory("ERROR", "Please enter a Survey ID");
                 return;
             }
 
-            document.getElementById(
-                "surveyContainer"
-            ).innerHTML =
-                `<div id="surveyEmbed"></div>`;
+            if (typeof sgembed !== "function") {
+                addHistory("ERROR", "Alchemer survey script has not loaded");
+                return;
+            }
 
-            addHistory(
-                "SURVEY",
-                `Loading Survey ${currentSurveyId}`
-            );
+            document.getElementById("surveyContainer").innerHTML =
+                '<div id="surveyEmbed"></div>';
 
-            sgembed('run', {
-                surveyid: currentSurveyId,
-                container: 'surveyEmbed'
-            });
+            addHistory("SURVEY", `Loading Survey ${currentSurveyId}`);
 
+            try {
+                sgembed("run", {
+                    surveyid: currentSurveyId,
+                    container: "surveyEmbed"
+                });
+            } catch (error) {
+                addHistory("ERROR", error.message);
+            }
         }
 
         function reloadSurvey() {
-
             if (!currentSurveyId) {
+                addHistory("ERROR", "Load a survey before reloading");
                 return;
             }
 
             loadSurvey();
-
         }
 
         function clearSurvey() {
-
-            document.getElementById(
-                "surveyContainer"
-            ).innerHTML =
+            document.getElementById("surveyContainer").innerHTML =
                 "Survey cleared.";
 
-            addHistory(
-                "SYSTEM",
-                "Survey Cleared"
-            );
+            currentSurveyId = "";
 
+            document.getElementById("surveyId").value = "";
+
+            addHistory("SYSTEM", "Survey Cleared");
         }
 
         function addHistory(type, message) {
+            const history = document.getElementById("eventHistory");
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement("div");
 
-            const history =
-                document.getElementById(
-                    "eventHistory"
-                );
+            entry.className = "event-entry";
 
-            const timestamp =
-                new Date().toLocaleTimeString();
+            const time = document.createElement("span");
+            time.className = "timestamp";
+            time.textContent = timestamp;
 
-            const entry =
-                document.createElement("div");
+            const label = document.createElement("strong");
+            label.textContent = type;
 
-            entry.className =
-                "event-entry";
-
-            entry.innerHTML =
-                `<span class="timestamp">${timestamp}</span><strong>${type}</strong>: ${message}`;
-
+            entry.append(time, " ", label, ": ", message);
             history.prepend(entry);
-
         }
 
+        document.getElementById("surveyId").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                loadSurvey();
+            }
+        });
     </script>
-
 </body>
-
 </html>
+```
