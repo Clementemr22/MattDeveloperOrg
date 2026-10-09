@@ -4,123 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matt Developer Org - Alchemer Web SDK Test Lab</title>
+    <title>Testing Website - SDK Testing</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    <links.css
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f5f7fa;
-            color: #333;
-            padding: 30px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
-
-        h1 {
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-        }
-
-        .card h2 {
-            margin-bottom: 15px;
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-        }
-
-        .status-item {
-            padding: 15px;
-            border-radius: 8px;
-            background: #f8f9fb;
-        }
-
-        .status-value {
-            margin-top: 8px;
-            font-weight: bold;
-        }
-
-        .green {
-            color: #16a34a;
-        }
-
-        .red {
-            color: #dc2626;
-        }
-
-        .blue {
-            color: #2563eb;
-        }
-
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 10px;
-        }
-
-        button {
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            background: #2563eb;
-            color: white;
-            font-size: 14px;
-        }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            margin-bottom: 10px;
-        }
-
-        #eventHistory {
-            max-height: 350px;
-            overflow-y: auto;
-        }
-
-        .event-entry {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-family: Consolas, monospace;
-        }
-
-        .timestamp {
-            color: #666;
-            margin-right: 10px;
-        }
-    </style>
-
-    <!-- Alchemer Bootstrap -->
     <script>
         (function initApptentiveSDK() {
             var ApptentiveSDK = window.ApptentiveSDK = window.ApptentiveSDK || [];
@@ -156,31 +43,32 @@
                         var method = ApptentiveSDK.methods[i];
                         ApptentiveSDK[method] = ApptentiveSDK.factory(method);
                     }
-
-                    ApptentiveSDK.LOADER_VERSION = "1.0.0";
                 }
             }
         })();
     </script>
 
-    <!-- Actual SDK -->
     <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk"></script>
-
 </head>
 
 <body>
 
     <div class="container">
 
-        <h1>🧪 Alchemer Web SDK Test Lab</h1>
+        <nav class="card">
+            <a href="index.html">SDK Testing</a> |
+            <a href="survey-embed.html">Survey Embed Testing</a>
+        </nav>
+
+        <h1>Testing Website</h1>
 
         <p class="subtitle">
-            Matt Developer Org • Event Testing • Interaction Validation • SDK Diagnostics
+            Event Testing • Interaction Validation • Conversation Monitoring
         </p>
 
         <div class="card">
 
-            <h2>SDK Status</h2>
+            <h2>Status</h2>
 
             <div class="status-grid">
 
@@ -192,15 +80,22 @@
                 </div>
 
                 <div class="status-item">
-                    Conversation
+                    Conversation Status
                     <div id="conversationStatus" class="status-value red">
                         Not Created
                     </div>
                 </div>
 
                 <div class="status-item">
+                    Conversation ID
+                    <div id="conversationId" class="status-value">
+                        Unknown
+                    </div>
+                </div>
+
+                <div class="status-item">
                     Last Event
-                    <div id="lastEvent" class="status-value blue">
+                    <div id="lastEvent" class="status-value">
                         None
                     </div>
                 </div>
@@ -222,10 +117,6 @@
 
             <div class="button-grid">
 
-                <button onclick="sendEvent('site-loaded')">
-                    Site Loaded
-                </button>
-
                 <button onclick="sendEvent('test-survey')">
                     Test Survey
                 </button>
@@ -236,14 +127,6 @@
 
                 <button onclick="sendEvent('test-love-dialog')">
                     Love Dialog
-                </button>
-
-                <button onclick="sendEvent('checkout-complete')">
-                    Checkout Complete
-                </button>
-
-                <button onclick="sendEvent('support-request')">
-                    Support Request
                 </button>
 
             </div>
@@ -267,20 +150,12 @@
 
         <div class="card">
 
-            <h2>SDK Tools</h2>
+            <h2>Tools</h2>
 
             <div class="button-grid">
 
-                <button onclick="runDoctor()">
-                    Run Doctor
-                </button>
-
                 <button onclick="openMessageCenter()">
                     Open Message Center
-                </button>
-
-                <button onclick="sdkCheck()">
-                    SDK Check
                 </button>
 
                 <button onclick="clearHistory()">
@@ -307,8 +182,8 @@
 
     <script>
 
-        let eventCounter = 0;
         let sdkReady = false;
+        let eventCounter = 0;
 
         document.addEventListener("DOMContentLoaded", function () {
             waitForSdk();
@@ -328,6 +203,7 @@
                     window.ApptentiveSDK &&
                     typeof ApptentiveSDK.createConversation === "function"
                 ) {
+
                     clearInterval(timer);
 
                     sdkReady = true;
@@ -344,16 +220,11 @@
 
                     clearInterval(timer);
 
-                    document.getElementById("sdkLoaded").innerHTML =
-                        '<span class="red">✗ SDK Not Loaded</span>';
-
-                    addHistory(
-                        "ERROR",
-                        "SDK not found after 10 seconds"
-                    );
+                    addHistory("ERROR", "SDK not loaded after timeout");
                 }
 
             }, 500);
+
         }
 
         function createConversation() {
@@ -365,156 +236,74 @@
                 document.getElementById("conversationStatus").innerHTML =
                     '<span class="green">✓ Created</span>';
 
-                addHistory(
-                    "SYSTEM",
-                    "Conversation Created"
-                );
+                const generatedId = crypto.randomUUID();
 
-                console.log("Conversation Created");
+                document.getElementById("conversationId").textContent =
+                    generatedId;
+
+                addHistory("SYSTEM", "Conversation Created");
 
             } catch (e) {
 
-                document.getElementById("conversationStatus").innerHTML =
-                    '<span class="red">✗ Failed</span>';
-
                 addHistory("ERROR", e.message);
 
-                console.error(e);
             }
+
         }
 
         function sendEvent(eventName) {
 
             if (!sdkReady) {
-
-                addHistory(
-                    "ERROR",
-                    "SDK not loaded"
-                );
-
+                addHistory("ERROR", "SDK not loaded");
                 return;
             }
 
-            try {
+            ApptentiveSDK.engage(eventName);
 
-                ApptentiveSDK.engage(eventName);
+            eventCounter++;
 
-                eventCounter++;
+            document.getElementById("lastEvent").textContent =
+                eventName;
 
-                document.getElementById("lastEvent").textContent =
-                    eventName;
+            document.getElementById("eventCount").textContent =
+                eventCounter;
 
-                document.getElementById("eventCount").textContent =
-                    eventCounter;
+            addHistory("EVENT", eventName);
 
-                addHistory(
-                    "EVENT",
-                    eventName
-                );
-
-                console.log(
-                    "Event Sent:",
-                    eventName
-                );
-
-            } catch (e) {
-
-                addHistory(
-                    "ERROR",
-                    e.message
-                );
-
-                console.error(e);
-            }
         }
 
         function sendCustomEvent() {
 
-            const eventName =
-                document
-                    .getElementById("customEvent")
-                    .value
-                    .trim();
+            const value =
+                document.getElementById("customEvent").value.trim();
 
-            if (!eventName) {
-
-                alert("Enter an event name.");
-
+            if (!value) {
                 return;
             }
 
-            sendEvent(eventName);
+            sendEvent(value);
 
             document.getElementById("customEvent").value = "";
-        }
 
-        function runDoctor() {
-
-            try {
-
-                if (
-                    window.ApptentiveSDK &&
-                    typeof ApptentiveSDK.doctor === "function"
-                ) {
-
-                    ApptentiveSDK.doctor();
-
-                    addHistory(
-                        "TOOLS",
-                        "Doctor Executed"
-                    );
-
-                } else {
-
-                    addHistory(
-                        "TOOLS",
-                        "Doctor not available"
-                    );
-                }
-
-            } catch (e) {
-
-                console.error(e);
-                addHistory("ERROR", e.message);
-            }
         }
 
         function openMessageCenter() {
 
             try {
 
-                if (
-                    window.ApptentiveSDK &&
-                    typeof ApptentiveSDK.showMessageCenter === "function"
-                ) {
+                ApptentiveSDK.showMessageCenter();
 
-                    ApptentiveSDK.showMessageCenter();
-
-                    addHistory(
-                        "TOOLS",
-                        "Message Center Opened"
-                    );
-                }
+                addHistory(
+                    "TOOLS",
+                    "Message Center Opened"
+                );
 
             } catch (e) {
 
-                console.error(e);
                 addHistory("ERROR", e.message);
+
             }
-        }
 
-        function sdkCheck() {
-
-            console.log("ApptentiveSDK:", window.ApptentiveSDK);
-
-            addHistory(
-                "TOOLS",
-                "SDK Check Executed"
-            );
-
-            alert(
-                "Check browser console for SDK details."
-            );
         }
 
         function addHistory(type, message) {
@@ -528,12 +317,14 @@
             const entry =
                 document.createElement("div");
 
-            entry.className = "event-entry";
+            entry.className =
+                "event-entry";
 
             entry.innerHTML =
                 `<span class="timestamp">${timestamp}</span><strong>${type}</strong>: ${message}`;
 
             history.prepend(entry);
+
         }
 
         function clearHistory() {
@@ -544,6 +335,7 @@
                 "SYSTEM",
                 "History Cleared"
             );
+
         }
 
     </script>
