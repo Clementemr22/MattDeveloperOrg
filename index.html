@@ -160,34 +160,6 @@
     <script>
         let sdkReady = false;
         let conversationStarted = false;
-        let initializationAttempts = 0;
-
-        const trackedEvents = [
-            "apptentive:init",
-            "apptentive:ready",
-            "apptentive:error",
-            "apptentive:render:interaction",
-            "apptentive:love-dialog:launch",
-            "apptentive:love-dialog:error",
-            "apptentive:love-dialog:close",
-            "apptentive:love-dialog:yes",
-            "apptentive:love-dialog:no"
-        ];
-
-        trackedEvents.forEach(function (eventName) {
-            document.addEventListener(eventName, function (event) {
-                console.log("Apptentive event:", eventName, event.detail);
-
-                addHistory(
-                    "SDK",
-                    eventName + (
-                        event.detail
-                            ? ": " + JSON.stringify(event.detail)
-                            : ""
-                    )
-                );
-            });
-        });
 
         document.addEventListener("DOMContentLoaded", function () {
             addHistory("SYSTEM", "Page loaded");
@@ -195,37 +167,43 @@
         });
 
         function waitForSdk() {
-            addHistory("SYSTEM", "Waiting for SDK initialization");
+            addHistory("SYSTEM", "Waiting for SDK");
+
+            let attempts = 0;
 
             const timer = setInterval(function () {
-                initializationAttempts++;
+                attempts++;
 
                 const sdk = window.ApptentiveSDK;
 
                 if (
                     sdk &&
-                    sdk.version &&
                     typeof sdk.createConversation === "function" &&
-                    !conversationStarted
+                    sdk.version
                 ) {
                     clearInterval(timer);
-                    conversationStarted = true;
-                    createConversation();
+
+                    if (!conversationStarted) {
+                        conversationStarted = true;
+                        sdkReady = true;
+
+                        updateStatus("sdkLoaded", "SDK Detected", true);
+                        addHistory("SYSTEM", "SDK detected");
+
+                        createConversation();
+                    }
+
                     return;
                 }
 
-                if (initializationAttempts >= 40 && !conversationStarted) {
+                if (attempts >= 40) {
                     clearInterval(timer);
 
-                    updateStatus(
-                        "sdkLoaded",
-                        "Initialization Not Confirmed",
-                        false
-                    );
+                    updateStatus("sdkLoaded", "Not Confirmed", false);
 
                     addHistory(
                         "ERROR",
-                        "SDK initialization was not confirmed after 20 seconds. Check the Console and Network tabs."
+                        "SDK initialization was not confirmed. Check the browser Console and Network tabs."
                     );
 
                     console.error(
@@ -236,53 +214,33 @@
             }, 500);
         }
 
-        async function createConversation() {
+        function createConversation() {
             const sdk = window.ApptentiveSDK;
 
-            updateStatus("sdkLoaded", "SDK Detected", true);
-            updateStatus("conversationStatus", "Creating...", false);
-
-            addHistory("SYSTEM", "SDK detected; requesting conversation creation");
+            if (!sdk || typeof sdk.createConversation !== "function") {
+                sdkReady = false;
+                addHistory("ERROR", "createConversation is unavailable");
+                return;
+            }
 
             try {
-                const result = await sdk.createConversation();
+                addHistory("SYSTEM", "Requesting conversation creation");
 
-                console.log("Apptentive createConversation result:", result);
-                console.log("Apptentive SDK object:", sdk);
+                sdk.createConversation();
 
-                if (result instanceof Error) {
-                    throw result;
-                }
-
-                sdkReady = true;
-
-                updateStatus("sdkLoaded", "Loaded", true);
-                updateStatus("conversationStatus", "Request Completed", true);
-
-                const conversationId =
-                    result && typeof result === "object"
-                        ? (
-                            result.conversation_id ||
-                            result.conversationId ||
-                            result.id ||
-                            result.conversation?.id
-                        )
-                        : null;
-
-                const sessionId =
-                    sdk.session_id ||
-                    sdk.sessionId ||
-                    null;
-
-                document.getElementById("conversationId").textContent =
-                    conversationId ||
-                    sessionId ||
-                    "Not exposed by SDK";
+                document.getElementById("conversationStatus").textContent =
+                    "Request Sent";
 
                 addHistory(
                     "SYSTEM",
-                    "Conversation creation call completed. Inspect Console for the returned value."
+                    "Conversation creation request sent. Check Console for SDK details."
                 );
+
+                console.log("Apptentive SDK:", sdk);
+                console.log("Apptentive session ID:", sdk.session_id);
+
+                document.getElementById("conversationId").textContent =
+                    sdk.session_id || "Not exposed yet";
 
             } catch (error) {
                 sdkReady = false;
@@ -291,69 +249,38 @@
 
                 addHistory(
                     "ERROR",
-                    "Conversation creation failed: " +
-                    (error?.message || String(error))
+                    "Conversation request failed: " +
+                    (error.message || String(error))
                 );
 
                 console.error("Conversation creation failed:", error);
             }
         }
 
-        function updateStatus(elementId, message, success) {
-            const element = document.getElementById(elementId);
-
-            element.textContent = message;
-            element.className = "status-value " +
-                (success ? "green" : "red");
-        }
-
         function sendEvent(eventName) {
             const sdk = window.ApptentiveSDK;
 
             if (!sdkReady || !sdk) {
-                addHistory(
-                    "ERROR",
-                    "SDK conversation is not ready. Check initialization status."
-                );
+                addHistory("ERROR", "SDK is not ready");
                 return;
             }
 
             try {
-                console.log("Sending Apptentive event:", eventName);
-
-                if (typeof sdk.canShowInteraction === "function") {
-                    const eligibility = sdk.canShowInteraction(eventName);
-
-                    console.log(
-                        "Interaction eligibility for " + eventName + ":",
-                        eligibility
-                    );
-
-                    addHistory(
-                        "DIAGNOSTIC",
-                        "Eligibility result for " + eventName + ": " +
-                        String(eligibility)
-                    );
-                } else {
-                    addHistory(
-                        "DIAGNOSTIC",
-                        "This SDK does not expose canShowInteraction()."
-                    );
-                }
+                console.log("Sending event:", eventName);
 
                 sdk.engage(eventName);
 
                 document.getElementById("lastEvent").textContent = eventName;
 
-                addHistory("EVENT", "Engage requested: " + eventName);
+                addHistory("EVENT", "Event sent: " + eventName);
 
             } catch (error) {
                 addHistory(
                     "ERROR",
-                    "Event failed: " + (error?.message || String(error))
+                    "Event failed: " + (error.message || String(error))
                 );
 
-                console.error("Apptentive event failed:", error);
+                console.error("Event failed:", error);
             }
         }
 
@@ -362,7 +289,7 @@
             const eventName = input.value.trim();
 
             if (!eventName) {
-                addHistory("ERROR", "Enter a custom event name first");
+                addHistory("ERROR", "Enter a custom event name");
                 return;
             }
 
@@ -374,22 +301,32 @@
             const sdk = window.ApptentiveSDK;
 
             if (!sdkReady || !sdk) {
-                addHistory("ERROR", "SDK conversation is not ready");
+                addHistory("ERROR", "SDK is not ready");
                 return;
             }
 
             try {
                 sdk.showMessageCenter();
+
                 addHistory("TOOLS", "Message Center requested");
+
             } catch (error) {
                 addHistory(
                     "ERROR",
                     "Message Center failed: " +
-                    (error?.message || String(error))
+                    (error.message || String(error))
                 );
 
-                console.error(error);
+                console.error("Message Center failed:", error);
             }
+        }
+
+        function updateStatus(elementId, message, success) {
+            const element = document.getElementById(elementId);
+
+            element.textContent = message;
+            element.className = "status-value " +
+                (success ? "green" : "red");
         }
 
         function addHistory(type, message) {
@@ -418,9 +355,7 @@
             entry.appendChild(timestamp);
             entry.appendChild(document.createTextNode(" "));
             entry.appendChild(label);
-            entry.appendChild(
-                document.createTextNode(": " + String(message))
-            );
+            entry.appendChild(document.createTextNode(": " + String(message)));
 
             history.prepend(entry);
         }
