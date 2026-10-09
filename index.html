@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,11 +46,9 @@
     </script>
 
     <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk"></script>
-
 </head>
 
 <body>
-
     <div class="container">
 
         <nav class="card">
@@ -62,20 +59,16 @@
 
         <header>
             <h1>Testing Website</h1>
-
             <p class="subtitle">
                 Event Testing • Interaction Validation • Conversation Monitoring
             </p>
         </header>
 
         <main>
-
             <section class="card">
-
                 <h2>Status</h2>
 
                 <div class="status-grid">
-
                     <div class="status-item">
                         SDK Status
                         <div id="sdkLoaded" class="status-value red">
@@ -103,17 +96,13 @@
                             None
                         </div>
                     </div>
-
                 </div>
-
             </section>
 
             <section class="card">
-
                 <h2>Quick Test Events</h2>
 
                 <div class="button-grid">
-
                     <button onclick="sendEvent('test-survey')">
                         Test Survey
                     </button>
@@ -125,32 +114,27 @@
                     <button onclick="sendEvent('test-love-dialog')">
                         Love Dialog
                     </button>
-
                 </div>
-
             </section>
 
             <section class="card">
-
                 <h2>Custom Event</h2>
 
                 <input
                     id="customEvent"
                     type="text"
-                    placeholder="Enter custom event name">
+                    placeholder="Enter custom event name"
+                >
 
                 <button onclick="sendCustomEvent()">
                     Send Custom Event
                 </button>
-
             </section>
 
             <section class="card">
-
                 <h2>Tools</h2>
 
                 <div class="button-grid">
-
                     <button onclick="openMessageCenter()">
                         Open Message Center
                     </button>
@@ -158,13 +142,10 @@
                     <button onclick="clearHistory()">
                         Clear Event History
                     </button>
-
                 </div>
-
             </section>
 
             <section class="card">
-
                 <h2>Event History</h2>
 
                 <div id="eventHistory">
@@ -172,211 +153,282 @@
                         Waiting for activity...
                     </div>
                 </div>
-
             </section>
-
         </main>
-
     </div>
 
     <script>
-
         let sdkReady = false;
+        let conversationStarted = false;
+        let initializationAttempts = 0;
+
+        const trackedEvents = [
+            "apptentive:init",
+            "apptentive:ready",
+            "apptentive:error",
+            "apptentive:render:interaction",
+            "apptentive:love-dialog:launch",
+            "apptentive:love-dialog:error",
+            "apptentive:love-dialog:close",
+            "apptentive:love-dialog:yes",
+            "apptentive:love-dialog:no"
+        ];
+
+        trackedEvents.forEach(function (eventName) {
+            document.addEventListener(eventName, function (event) {
+                console.log("Apptentive event:", eventName, event.detail);
+
+                addHistory(
+                    "SDK",
+                    eventName + (
+                        event.detail
+                            ? ": " + JSON.stringify(event.detail)
+                            : ""
+                    )
+                );
+            });
+        });
 
         document.addEventListener("DOMContentLoaded", function () {
+            addHistory("SYSTEM", "Page loaded");
             waitForSdk();
         });
 
         function waitForSdk() {
-
-            addHistory("SYSTEM", "Waiting for SDK");
-
-            let attempts = 0;
+            addHistory("SYSTEM", "Waiting for SDK initialization");
 
             const timer = setInterval(function () {
+                initializationAttempts++;
 
-                attempts++;
+                const sdk = window.ApptentiveSDK;
 
                 if (
-                    window.ApptentiveSDK &&
-                    typeof ApptentiveSDK.createConversation === "function"
+                    sdk &&
+                    sdk.version &&
+                    typeof sdk.createConversation === "function" &&
+                    !conversationStarted
                 ) {
-
                     clearInterval(timer);
-
-                    sdkReady = true;
-
-                    document.getElementById("sdkLoaded").innerHTML =
-                        '<span class="green">✓ Loaded</span>';
-
-                    addHistory("SYSTEM", "SDK Loaded");
-
+                    conversationStarted = true;
                     createConversation();
+                    return;
                 }
 
-                if (attempts >= 20 && !sdkReady) {
-
+                if (initializationAttempts >= 40 && !conversationStarted) {
                     clearInterval(timer);
 
-                    document.getElementById("sdkLoaded").innerHTML =
-                        '<span class="red">✗ Not Loaded</span>';
+                    updateStatus(
+                        "sdkLoaded",
+                        "Initialization Not Confirmed",
+                        false
+                    );
 
                     addHistory(
                         "ERROR",
-                        "SDK not loaded after timeout"
+                        "SDK initialization was not confirmed after 20 seconds. Check the Console and Network tabs."
+                    );
+
+                    console.error(
+                        "Apptentive SDK initialization was not confirmed.",
+                        window.ApptentiveSDK
                     );
                 }
-
             }, 500);
-
         }
 
-        function createConversation() {
+        async function createConversation() {
+            const sdk = window.ApptentiveSDK;
+
+            updateStatus("sdkLoaded", "SDK Detected", true);
+            updateStatus("conversationStatus", "Creating...", false);
+
+            addHistory("SYSTEM", "SDK detected; requesting conversation creation");
 
             try {
+                const result = await sdk.createConversation();
 
-                ApptentiveSDK.createConversation();
+                console.log("Apptentive createConversation result:", result);
+                console.log("Apptentive SDK object:", sdk);
 
-                document.getElementById("conversationStatus").innerHTML =
-                    '<span class="green">✓ Created</span>';
+                if (result instanceof Error) {
+                    throw result;
+                }
+
+                sdkReady = true;
+
+                updateStatus("sdkLoaded", "Loaded", true);
+                updateStatus("conversationStatus", "Request Completed", true);
+
+                const conversationId =
+                    result && typeof result === "object"
+                        ? (
+                            result.conversation_id ||
+                            result.conversationId ||
+                            result.id ||
+                            result.conversation?.id
+                        )
+                        : null;
+
+                const sessionId =
+                    sdk.session_id ||
+                    sdk.sessionId ||
+                    null;
+
+                document.getElementById("conversationId").textContent =
+                    conversationId ||
+                    sessionId ||
+                    "Not exposed by SDK";
 
                 addHistory(
                     "SYSTEM",
-                    "Conversation Created"
+                    "Conversation creation call completed. Inspect Console for the returned value."
                 );
 
-            } catch (e) {
+            } catch (error) {
+                sdkReady = false;
 
-                document.getElementById("conversationStatus").innerHTML =
-                    '<span class="red">✗ Failed</span>';
+                updateStatus("conversationStatus", "Failed", false);
 
                 addHistory(
                     "ERROR",
-                    e.message
+                    "Conversation creation failed: " +
+                    (error?.message || String(error))
                 );
 
+                console.error("Conversation creation failed:", error);
             }
+        }
 
+        function updateStatus(elementId, message, success) {
+            const element = document.getElementById(elementId);
+
+            element.textContent = message;
+            element.className = "status-value " +
+                (success ? "green" : "red");
         }
 
         function sendEvent(eventName) {
+            const sdk = window.ApptentiveSDK;
 
-            if (!sdkReady) {
-
+            if (!sdkReady || !sdk) {
                 addHistory(
                     "ERROR",
-                    "SDK not loaded"
+                    "SDK conversation is not ready. Check initialization status."
                 );
-
                 return;
             }
 
             try {
+                console.log("Sending Apptentive event:", eventName);
 
-                console.log("Sending Event:", eventName);
+                if (typeof sdk.canShowInteraction === "function") {
+                    const eligibility = sdk.canShowInteraction(eventName);
 
-                ApptentiveSDK.engage(eventName);
+                    console.log(
+                        "Interaction eligibility for " + eventName + ":",
+                        eligibility
+                    );
 
-                document.getElementById("lastEvent").textContent =
-                    eventName;
+                    addHistory(
+                        "DIAGNOSTIC",
+                        "Eligibility result for " + eventName + ": " +
+                        String(eligibility)
+                    );
+                } else {
+                    addHistory(
+                        "DIAGNOSTIC",
+                        "This SDK does not expose canShowInteraction()."
+                    );
+                }
 
-                addHistory(
-                    "EVENT",
-                    eventName
-                );
+                sdk.engage(eventName);
 
-            } catch (e) {
+                document.getElementById("lastEvent").textContent = eventName;
 
+                addHistory("EVENT", "Engage requested: " + eventName);
+
+            } catch (error) {
                 addHistory(
                     "ERROR",
-                    e.message
+                    "Event failed: " + (error?.message || String(error))
                 );
 
-                console.error(e);
-
+                console.error("Apptentive event failed:", error);
             }
-
         }
 
         function sendCustomEvent() {
-
-            const eventName =
-                document
-                    .getElementById("customEvent")
-                    .value
-                    .trim();
+            const input = document.getElementById("customEvent");
+            const eventName = input.value.trim();
 
             if (!eventName) {
+                addHistory("ERROR", "Enter a custom event name first");
                 return;
             }
 
             sendEvent(eventName);
-
-            document.getElementById("customEvent").value = "";
-
+            input.value = "";
         }
 
         function openMessageCenter() {
+            const sdk = window.ApptentiveSDK;
 
-            try {
-
-                ApptentiveSDK.showMessageCenter();
-
-                addHistory(
-                    "TOOLS",
-                    "Message Center Opened"
-                );
-
-            } catch (e) {
-
-                addHistory(
-                    "ERROR",
-                    e.message
-                );
-
+            if (!sdkReady || !sdk) {
+                addHistory("ERROR", "SDK conversation is not ready");
+                return;
             }
 
+            try {
+                sdk.showMessageCenter();
+                addHistory("TOOLS", "Message Center requested");
+            } catch (error) {
+                addHistory(
+                    "ERROR",
+                    "Message Center failed: " +
+                    (error?.message || String(error))
+                );
+
+                console.error(error);
+            }
         }
 
         function addHistory(type, message) {
+            const history = document.getElementById("eventHistory");
 
-            const history =
-                document.getElementById("eventHistory");
+            const placeholder = history.querySelector(".event-entry");
 
-            if (history.innerHTML.includes("Waiting for activity")) {
+            if (
+                placeholder &&
+                placeholder.textContent.includes("Waiting for activity")
+            ) {
                 history.innerHTML = "";
             }
 
-            const timestamp =
-                new Date().toLocaleTimeString();
+            const entry = document.createElement("div");
+            const timestamp = document.createElement("span");
+            const label = document.createElement("strong");
 
-            const entry =
-                document.createElement("div");
+            entry.className = "event-entry";
 
-            entry.className =
-                "event-entry";
+            timestamp.className = "timestamp";
+            timestamp.textContent = new Date().toLocaleTimeString();
 
-            entry.innerHTML =
-                `<span class="timestamp">${timestamp}</span>
-                <strong>${type}</strong>: ${message}`;
+            label.textContent = type;
+
+            entry.appendChild(timestamp);
+            entry.appendChild(document.createTextNode(" "));
+            entry.appendChild(label);
+            entry.appendChild(
+                document.createTextNode(": " + String(message))
+            );
 
             history.prepend(entry);
-
         }
 
         function clearHistory() {
-
             document.getElementById("eventHistory").innerHTML = "";
-
-            addHistory(
-                "SYSTEM",
-                "History Cleared"
-            );
-
+            addHistory("SYSTEM", "History Cleared");
         }
-
     </script>
-
 </body>
-
 </html>
