@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing Website - Survey Embed Testing</title>
+
+    styles.css
+
+    https://api.alchemer.com/head/surveyjsscript>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <nav class="card">
+            <a href="index.html">SDK Testing</a> |
+            <a href="survey-embed.html">Survey Embed Testing</a>
+        </nav>
+
+        <h1>Testing Website</h1>
+
+        <p class="subtitle">
+            Survey Embed Testing
+        </p>
+
+        <div class="card">
+
+            <h2>Load Survey</h2>
+
+            <input
+                id="surveyId"
+                type="text"
+                placeholder="Enter Survey ID">
+
+            <button onclick="loadSurvey()">
+                Load Survey
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <h2>Actions</h2>
+
+            <div class="button-grid">
+
+                <button onclick="reloadSurvey()">
+                    Reload Survey
+                </button>
+
+                <button onclick="clearSurvey()">
+                    Clear Survey
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h2>Embed Area</h2>
+
+            <div id="surveyContainer">
+                Survey will load here.
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h2>Activity Log</h2>
+
+            <div id="eventHistory">
+
+                <div class="event-entry">
+                    Waiting for survey...
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let currentSurveyId = "";
+
+        function loadSurvey() {
+
+            currentSurveyId =
+                document.getElementById("surveyId")
+                    .value
+                    .trim();
+
+            if (!currentSurveyId) {
+                return;
+            }
+
+            document.getElementById(
+                "surveyContainer"
+            ).innerHTML =
+                `<div id="surveyEmbed"></div>`;
+
+            addHistory(
+                "SURVEY",
+                `Loading Survey ${currentSurveyId}`
+            );
+
+            sgembed('run', {
+                surveyid: currentSurveyId,
+                container: 'surveyEmbed'
+            });
+
+        }
+
+        function reloadSurvey() {
+
+            if (!currentSurveyId) {
+                return;
+            }
+
+            loadSurvey();
+
+        }
+
+        function clearSurvey() {
+
+            document.getElementById(
+                "surveyContainer"
+            ).innerHTML =
+                "Survey cleared.";
+
+            addHistory(
+                "SYSTEM",
+                "Survey Cleared"
+            );
+
+        }
+
+        function addHistory(type, message) {
+
+            const history =
+                document.getElementById(
+                    "eventHistory"
+                );
+
+            const timestamp =
+                new Date().toLocaleTimeString();
+
+            const entry =
+                document.createElement("div");
+
+            entry.className =
+                "event-entry";
+
+            entry.innerHTML =
+                `<span class="timestamp">${timestamp}</span><strong>${type}</strong>: ${message}`;
+
+            history.prepend(entry);
+
+        }
+
+    </script>
+
+</body>
+
+</html>
