@@ -1,187 +1,174 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Testing Website - SDK Testing</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 
     <script>
         (function initApptentiveSDK() {
             var ApptentiveSDK = window.ApptentiveSDK = window.ApptentiveSDK || [];
 
-            if (!ApptentiveSDK.version) {
-                if (!ApptentiveSDK.loaded) {
-                    ApptentiveSDK.loaded = true;
+            if (!ApptentiveSDK.version && !ApptentiveSDK.loaded) {
+                ApptentiveSDK.loaded = true;
 
-                    ApptentiveSDK.methods = [
-                        "buildDevice",
-                        "createConversation",
-                        "createMessage",
-                        "engage",
-                        "getSegments",
-                        "identifyPerson",
-                        "setOption",
-                        "setPageName",
-                        "showInteraction",
-                        "showMessageCenter",
-                        "updatePerson"
-                    ];
+                ApptentiveSDK.methods = [
+                    "buildDevice",
+                    "createConversation",
+                    "createMessage",
+                    "engage",
+                    "getSegments",
+                    "identifyPerson",
+                    "setOption",
+                    "setPageName",
+                    "showInteraction",
+                    "showMessageCenter",
+                    "updatePerson"
+                ];
 
-                    ApptentiveSDK.factory = function (t) {
-                        return function () {
-                            var args = Array.prototype.slice.call(arguments);
-                            args.unshift(t);
-                            ApptentiveSDK.push(args);
-                            return ApptentiveSDK;
-                        };
+                ApptentiveSDK.factory = function (method) {
+                    return function () {
+                        var args = Array.prototype.slice.call(arguments);
+                        args.unshift(method);
+                        ApptentiveSDK.push(args);
+                        return ApptentiveSDK;
                     };
+                };
 
-                    for (var i = 0; i < ApptentiveSDK.methods.length; i++) {
-                        var method = ApptentiveSDK.methods[i];
-                        ApptentiveSDK[method] = ApptentiveSDK.factory(method);
-                    }
+                for (var i = 0; i < ApptentiveSDK.methods.length; i++) {
+                    var method = ApptentiveSDK.methods[i];
+                    ApptentiveSDK[method] = ApptentiveSDK.factory(method);
                 }
             }
         })();
     </script>
 
-    <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk"></script>
+    <script
+        async
+        src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk">
+    </script>
 </head>
 
 <body>
-
     <div class="container">
 
         <nav class="card">
-            <a href="index.html">SDK Testing</a> |
+            <a href="index.html">SDK Testing</a>
+            |
             <a href="survey-embed.html">Survey Embed Testing</a>
         </nav>
 
-        <h1>Testing Website</h1>
+        <header>
+            <h1>Testing Website</h1>
+            <p class="subtitle">
+                Event Testing • Interaction Validation • Conversation Monitoring
+            </p>
+        </header>
 
-        <p class="subtitle">
-            Event Testing • Interaction Validation • Conversation Monitoring
-        </p>
+        <main>
+            <section class="card">
+                <h2>Status</h2>
 
-        <div class="card">
+                <div class="status-grid">
+                    <div class="status-item">
+                        SDK Status
+                        <div id="sdkLoaded" class="status-value red">
+                            Waiting...
+                        </div>
+                    </div>
 
-            <h2>Status</h2>
+                    <div class="status-item">
+                        Conversation Status
+                        <div id="conversationStatus" class="status-value red">
+                            Not Created
+                        </div>
+                    </div>
 
-            <div class="status-grid">
+                    <div class="status-item">
+                        Conversation ID
+                        <div id="conversationId" class="status-value">
+                            Unknown
+                        </div>
+                    </div>
 
-                <div class="status-item">
-                    SDK Status
-                    <div id="sdkLoaded" class="status-value red">
-                        Waiting...
+                    <div class="status-item">
+                        Last Event
+                        <div id="lastEvent" class="status-value">
+                            None
+                        </div>
+                    </div>
+
+                    <div class="status-item">
+                        Event Count
+                        <div id="eventCount" class="status-value">
+                            0
+                        </div>
                     </div>
                 </div>
+            </section>
 
-                <div class="status-item">
-                    Conversation Status
-                    <div id="conversationStatus" class="status-value red">
-                        Not Created
+            <section class="card">
+                <h2>Quick Test Events</h2>
+
+                <div class="button-grid">
+                    <button onclick="sendEvent('test-survey')">
+                        Test Survey
+                    </button>
+
+                    <button onclick="sendEvent('test-prompt')">
+                        Test Prompt
+                    </button>
+
+                    <button onclick="sendEvent('test-love-dialog')">
+                        Love Dialog
+                    </button>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Custom Event</h2>
+
+                <input
+                    id="customEvent"
+                    type="text"
+                    placeholder="Enter custom event name"
+                >
+
+                <button onclick="sendCustomEvent()">
+                    Send Custom Event
+                </button>
+            </section>
+
+            <section class="card">
+                <h2>Tools</h2>
+
+                <div class="button-grid">
+                    <button onclick="openMessageCenter()">
+                        Open Message Center
+                    </button>
+
+                    <button onclick="clearHistory()">
+                        Clear Event History
+                    </button>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Event History</h2>
+
+                <div id="eventHistory">
+                    <div class="event-entry">
+                        Waiting for activity...
                     </div>
                 </div>
-
-                <div class="status-item">
-                    Conversation ID
-                    <div id="conversationId" class="status-value">
-                        Unknown
-                    </div>
-                </div>
-
-                <div class="status-item">
-                    Last Event
-                    <div id="lastEvent" class="status-value">
-                        None
-                    </div>
-                </div>
-
-                <div class="status-item">
-                    Event Count
-                    <div id="eventCount" class="status-value">
-                        0
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <h2>Quick Test Events</h2>
-
-            <div class="button-grid">
-
-                <button onclick="sendEvent('test-survey')">
-                    Test Survey
-                </button>
-
-                <button onclick="sendEvent('test-prompt')">
-                    Test Prompt
-                </button>
-
-                <button onclick="sendEvent('test-love-dialog')">
-                    Love Dialog
-                </button>
-
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <h2>Custom Event</h2>
-
-            <input
-                id="customEvent"
-                type="text"
-                placeholder="Enter custom event name">
-
-            <button onclick="sendCustomEvent()">
-                Send Custom Event
-            </button>
-
-        </div>
-
-        <div class="card">
-
-            <h2>Tools</h2>
-
-            <div class="button-grid">
-
-                <button onclick="openMessageCenter()">
-                    Open Message Center
-                </button>
-
-                <button onclick="clearHistory()">
-                    Clear Event History
-                </button>
-
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <h2>Event History</h2>
-
-            <div id="eventHistory">
-                <div class="event-entry">
-                    Waiting for activity...
-                </div>
-            </div>
-
-        </div>
-
+            </section>
+        </main>
     </div>
 
     <script>
-
         let sdkReady = false;
         let eventCounter = 0;
 
@@ -190,20 +177,17 @@
         });
 
         function waitForSdk() {
-
             addHistory("SYSTEM", "Waiting for SDK");
 
             let attempts = 0;
 
             const timer = setInterval(function () {
-
                 attempts++;
 
                 if (
                     window.ApptentiveSDK &&
                     typeof ApptentiveSDK.createConversation === "function"
                 ) {
-
                     clearInterval(timer);
 
                     sdkReady = true;
@@ -217,20 +201,14 @@
                 }
 
                 if (attempts >= 20 && !sdkReady) {
-
                     clearInterval(timer);
-
                     addHistory("ERROR", "SDK not loaded after timeout");
                 }
-
             }, 500);
-
         }
 
         function createConversation() {
-
             try {
-
                 ApptentiveSDK.createConversation();
 
                 document.getElementById("conversationStatus").innerHTML =
@@ -242,17 +220,12 @@
                     generatedId;
 
                 addHistory("SYSTEM", "Conversation Created");
-
             } catch (e) {
-
                 addHistory("ERROR", e.message);
-
             }
-
         }
 
         function sendEvent(eventName) {
-
             if (!sdkReady) {
                 addHistory("ERROR", "SDK not loaded");
                 return;
@@ -262,20 +235,17 @@
 
             eventCounter++;
 
-            document.getElementById("lastEvent").textContent =
-                eventName;
-
-            document.getElementById("eventCount").textContent =
-                eventCounter;
+            document.getElementById("lastEvent").textContent = eventName;
+            document.getElementById("eventCount").textContent = eventCounter;
 
             addHistory("EVENT", eventName);
-
         }
 
         function sendCustomEvent() {
-
-            const value =
-                document.getElementById("customEvent").value.trim();
+            const value = document
+                .getElementById("customEvent")
+                .value
+                .trim();
 
             if (!value) {
                 return;
@@ -284,62 +254,37 @@
             sendEvent(value);
 
             document.getElementById("customEvent").value = "";
-
         }
 
         function openMessageCenter() {
-
             try {
-
                 ApptentiveSDK.showMessageCenter();
 
-                addHistory(
-                    "TOOLS",
-                    "Message Center Opened"
-                );
-
+                addHistory("TOOLS", "Message Center Opened");
             } catch (e) {
-
                 addHistory("ERROR", e.message);
-
             }
-
         }
 
         function addHistory(type, message) {
+            const history = document.getElementById("eventHistory");
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement("div");
 
-            const history =
-                document.getElementById("eventHistory");
-
-            const timestamp =
-                new Date().toLocaleTimeString();
-
-            const entry =
-                document.createElement("div");
-
-            entry.className =
-                "event-entry";
+            entry.className = "event-entry";
 
             entry.innerHTML =
-                `<span class="timestamp">${timestamp}</span><strong>${type}</strong>: ${message}`;
+                `<span class="timestamp">${timestamp}</span> ` +
+                `<strong>${type}</strong>: ${message}`;
 
             history.prepend(entry);
-
         }
 
         function clearHistory() {
-
             document.getElementById("eventHistory").innerHTML = "";
 
-            addHistory(
-                "SYSTEM",
-                "History Cleared"
-            );
-
+            addHistory("SYSTEM", "History Cleared");
         }
-
     </script>
-
 </body>
-
 </html>
