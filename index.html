@@ -409,14 +409,16 @@
                     name: userName,
                     email: email
                 });
-        
+                
                 ApptentiveSDK.updatePerson({
                     custom_data: {
                         authenticated: true,
+                        department: "Support",
+                        employeeType: "Internal",
                         environment: "Testing Website"
                     }
                 });
-        
+                        
                 document.getElementById(
                     "identityStatus"
                 ).textContent =
