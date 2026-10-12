@@ -387,4 +387,28 @@ footer {
         padding: 1rem;
     }
 }
-`
+
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.auth-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#userDisplay {
+    color: #777;
+    font-size: 14px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#loginButton {
+    min-width: 100px;
+}
