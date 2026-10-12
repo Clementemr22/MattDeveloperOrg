@@ -106,6 +106,13 @@
                         </div>
                     </div>
 
+                    <div class="status-item">
+                        Identity
+                        <div id="identitySummary" class="status-value">
+                            Anonymous
+                        </div>
+                    </div>
+
                 </div>
 
             </section>
@@ -144,6 +151,47 @@
                 <button onclick="sendCustomEvent()">
                     Send Custom Event
                 </button>
+
+            </section>
+
+            <section class="card">
+
+                <h2>Identity Testing</h2>
+
+                <input
+                    id="userId"
+                    type="text"
+                    placeholder="User ID">
+            
+                <input
+                    id="userName"
+                    type="text"
+                    placeholder="Display Name">
+            
+                <input
+                    id="userEmail"
+                    type="email"
+                    placeholder="Email Address">
+            
+                <div class="button-grid">
+            
+                    <button onclick="identifyUser()">
+                        Identify User
+                    </button>
+            
+                    <button onclick="setAnonymous()">
+                        Reset To Anonymous
+                    </button>
+            
+                </div>
+            
+                <br>
+            
+                <strong>Current Identity</strong>
+            
+                <div id="identityStatus">
+                    Anonymous
+                </div>
 
             </section>
 
@@ -325,6 +373,105 @@
 
             document.getElementById("customEvent").value = "";
 
+        }
+
+        function identifyUser() {
+
+            const userId =
+                document.getElementById("userId")
+                    .value
+                    .trim();
+        
+            const userName =
+                document.getElementById("userName")
+                    .value
+                    .trim();
+        
+            const email =
+                document.getElementById("userEmail")
+                    .value
+                    .trim();
+        
+            if (!userId) {
+        
+                addHistory(
+                    "ERROR",
+                    "User ID is required"
+                );
+        
+                return;
+            }
+        
+            try {
+        
+                ApptentiveSDK.identifyPerson({
+                    id: userId,
+                    name: userName,
+                    email: email
+                });
+        
+                ApptentiveSDK.updatePerson({
+                    custom_data: {
+                        authenticated: true,
+                        environment: "Testing Website"
+                    }
+                });
+        
+                document.getElementById(
+                    "identityStatus"
+                ).textContent =
+                    userName || userId;
+        
+                document.getElementById(
+                    "identitySummary"
+                ).textContent =
+                    userName || userId;
+        
+                addHistory(
+                    "IDENTITY",
+                    "User identified: " + userId
+                );
+        
+            } catch (e) {
+        
+                addHistory(
+                    "ERROR",
+                    e.message
+                );
+        
+            }
+        
+        }
+
+        function setAnonymous() {
+        
+            document.getElementById(
+                "identityStatus"
+            ).textContent =
+                "Anonymous";
+        
+            document.getElementById(
+                "identitySummary"
+            ).textContent =
+                "Anonymous";
+        
+            document.getElementById(
+                "userId"
+            ).value = "";
+        
+            document.getElementById(
+                "userName"
+            ).value = "";
+        
+            document.getElementById(
+                "userEmail"
+            ).value = "";
+        
+            addHistory(
+                "IDENTITY",
+                "Reset to anonymous state"
+            );
+        
         }
 
         function openMessageCenter() {
