@@ -50,6 +50,9 @@
 
     <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk"></script>
 
+
+    <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+
 </head>
 
 <body>
@@ -62,13 +65,31 @@
             <a href="survey-embed.html">Survey Embed Testing</a>
         </nav>
 
-        <header>
-            <h1>Testing Website</h1>
+        <header class="header-bar">
 
-            <p class="subtitle">
-                Event Testing • Interaction Validation • Conversation Monitoring
-            </p>
-        </header>
+    <div>
+        <h1>Testing Website</h1>
+
+        <p class="subtitle">
+            Event Testing • Interaction Validation • Conversation Monitoring
+        </p>
+    </div>
+
+    <div id="authContainer">
+
+        <button
+            id="loginButton"
+            onclick="signInMicrosoft()">
+            Sign In
+        </button>
+
+        <span id="userDisplay">
+            Anonymous
+        </span>
+
+    </div>
+
+</header>
 
         <main>
 
@@ -109,6 +130,13 @@
                     <div class="status-item">
                         Identity
                         <div id="identitySummary" class="status-value">
+                            Anonymous
+                        </div>
+                    </div>
+
+                    <div class="status-item">
+                        User Type
+                        <div id="userType" class="status-value">
                             Anonymous
                         </div>
                     </div>
@@ -156,39 +184,18 @@
 
             <section class="card">
 
-                <h2>Identity Testing</h2>
+                <h2>Authentication</h2>
 
-                <input
-                    id="userId"
-                    type="text"
-                    placeholder="User ID">
-            
-                <input
-                    id="userName"
-                    type="text"
-                    placeholder="Display Name">
-            
-                <input
-                    id="userEmail"
-                    type="email"
-                    placeholder="Email Address">
-            
-                <div class="button-grid">
-            
-                    <button onclick="identifyUser()">
-                        Identify User
-                    </button>
-            
-                    <button onclick="setAnonymous()">
-                        Reset To Anonymous
-                    </button>
-            
-                </div>
-            
+                <p>
+                    Anonymous by default. Use the Sign In button in the top-right
+                    to authenticate with Microsoft Entra and create a user-specific
+                    conversation.
+                </p>
+
                 <br>
-            
-                <strong>Current Identity</strong>
-            
+
+                <strong>Current User</strong>
+
                 <div id="identityStatus">
                     Anonymous
                 </div>
@@ -232,6 +239,19 @@
     <script>
 
         let sdkReady = false;
+        let currentUser = null;
+
+        const msalConfig = {
+            auth: {
+                clientId: "YOUR_CLIENT_ID",
+                authority:
+                    "https://login.microsoftonline.com/YOUR_TENANT_ID",
+                redirectUri: window.location.origin
+            }
+        };
+
+        const msalInstance =
+            new msal.PublicClientApplication(msalConfig);
 
         document.addEventListener("DOMContentLoaded", function () {
             waitForSdk();
@@ -280,29 +300,34 @@
             }, 500);
         }
 
+        
+
         function createConversation() {
 
             try {
 
                 ApptentiveSDK.createConversation();
 
-                document.getElementById("conversationStatus").innerHTML =
+                document.getElementById(
+                    "conversationStatus"
+                ).innerHTML =
                     '<span class="green">✓ Created</span>';
 
-                /* Restores previous behavior */
-                const generatedId = crypto.randomUUID();
-
-                document.getElementById("conversationId").textContent =
-                    generatedId;
+                document.getElementById(
+                    "conversationId"
+                ).textContent =
+                    crypto.randomUUID();
 
                 addHistory(
                     "SYSTEM",
-                    "Conversation Created"
+                    "Anonymous conversation created"
                 );
 
             } catch (e) {
 
-                document.getElementById("conversationStatus").innerHTML =
+                document.getElementById(
+                    "conversationStatus"
+                ).innerHTML =
                     '<span class="red">✗ Failed</span>';
 
                 addHistory(
@@ -310,7 +335,184 @@
                     e.message
                 );
 
-                console.error(e);
+            }
+
+        }
+
+        async function signInMicrosoft() {
+
+            try {
+
+                const response =
+                    await msalInstance.loginPopup({
+                        scopes: ["User.Read"]
+                    });
+
+                const account =
+                    response.account;
+
+                currentUser = account;
+
+                createAuthenticatedConversation(
+                    account
+                );
+
+            } catch (error) {
+
+                console.error(error);
+
+                addHistory(
+                    "ERROR",
+                    "Microsoft login failed"
+                );
+
+            }
+
+        }
+
+
+        function createAuthenticatedConversation(
+            account
+        ) {
+
+            try {
+
+                /*
+                * Create a NEW conversation
+                * for the authenticated user.
+                */
+
+                ApptentiveSDK.createConversation();
+
+                ApptentiveSDK.identifyPerson({
+                    id: account.localAccountId,
+                    name: account.name,
+                    email: account.username
+                });
+
+                ApptentiveSDK.updatePerson({
+                    custom_data: {
+                        userEmail:
+                            account.username,
+                        authenticated: true,
+                        loginProvider:
+                            "Microsoft Entra",
+                        environment:
+                            "Testing Website"
+                    }
+                });
+
+                document.getElementById(
+                    "userDisplay"
+                ).textContent =
+                    account.username;
+
+                document.getElementById(
+                    "identityStatus"
+                ).textContent =
+                    account.username;
+
+                document.getElementById(
+                    "identitySummary"
+                ).textContent =
+                    account.username;
+
+                document.getElementById(
+                    "userType"
+                ).textContent =
+                    "Authenticated";
+
+                document.getElementById(
+                    "conversationId"
+                ).textContent =
+                    account.localAccountId;
+
+                document.getElementById(
+                    "loginButton"
+                ).textContent =
+                    "Sign Out";
+
+                document.getElementById(
+                    "loginButton"
+                ).onclick =
+                    signOutMicrosoft;
+
+                addHistory(
+                    "IDENTITY",
+                    "Signed in as " +
+                    account.username
+                );
+
+            } catch (error) {
+
+                console.error(error);
+
+                addHistory(
+                    "ERROR",
+                    error.message
+                );
+
+            }
+
+        }
+
+        async function signOutMicrosoft() {
+
+            try {
+
+                const account =
+                    msalInstance.getAllAccounts()[0];
+
+                if (account) {
+
+                    await msalInstance.logoutPopup({
+                        account: account
+                    });
+
+                }
+
+                currentUser = null;
+
+                document.getElementById(
+                    "userDisplay"
+                ).textContent =
+                    "Anonymous";
+
+                document.getElementById(
+                    "identityStatus"
+                ).textContent =
+                    "Anonymous";
+
+                document.getElementById(
+                    "identitySummary"
+                ).textContent =
+                    "Anonymous";
+
+                document.getElementById(
+                    "userType"
+                ).textContent =
+                    "Anonymous";
+
+                document.getElementById(
+                    "loginButton"
+                ).textContent =
+                    "Sign In";
+
+                document.getElementById(
+                    "loginButton"
+                ).onclick =
+                    signInMicrosoft;
+
+                createConversation();
+
+                addHistory(
+                    "IDENTITY",
+                    "Signed out"
+                );
+
+            } catch (error) {
+
+                console.error(error);
 
             }
 
