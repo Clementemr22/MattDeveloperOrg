@@ -1,58 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Testing Website - Survey Embed Testing</title>
-
-    <link rel="stylesheet" href="./styles.css">
-
-    <script src="https://api.alchemer.com/head/surveyjsscript"></script>
-</head>
-
-<body>
-    <div class="container">
-
-        <nav class="card">
-            <a href="./index.html">SDK Testing</a>
-            |
-            <a href="./survey-embed.html">Survey Embed Testing</a>
-        </nav>
-
-        <header>
-            <h1>Testing Website</h1>
-
-            <p class="subtitle">
-                Survey Embed Testing
-            </p>
-        </header>
-
-        <main>
-
-            <section class="card">
-                <h2>Embed Area</h2>
-
-                <div id="surveyContainer">
-                    Survey will load here.
-                </div>
-                <!-- This embed code may be restricted to use on a single domain, see documentation at: https://help.alchemer.com/help/iframe-embed#limit-permitted-domains-for-embeds -->
-<!-- This embed code may be restricted to use on a single domain, see documentation at: https://help.alchemer.com/help/iframe-embed#limit-permitted-domains-for-embeds -->
-<iframe src="https://survey.alchemer.com/s3/8795209/CSAT-5-Point-Rating" frameborder="0" width="100%" height="600" style="overflow:hidden"></iframe>
-            <script>
-window.addEventListener('message', function(event) {
-  let iframeElem = document.querySelector('#alchemer-embed');
-
-  if (iframeElem && event.data.caller === 'Alchemer') {
-    iframeElem.height = event.data.payload;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#74869a">
+  <title>Survey Embed Testing — Matt's Web App</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #172033;
+    --muted: #65718a;
+    --line: #e5eaf2;
+    --surface: #ffffff;
+    --canvas: #f5f7fb;
+    --accent: #e88945;
+    --accent-dark: #cf7130;
+    --shadow: 0 14px 38px rgba(25, 38, 68, 0.06);
   }
-});
-</script>
-            </section>
 
-           
-        </main>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #96a3b3 0%, #ecedef 100%);
+    background-attachment: fixed;
+    color: #f5f7fb;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+
+  a { color: inherit; }
+  button, input { font: inherit; }
+
+  .site-header { position: relative; z-index: 10; }
+  .header-inner, .page {
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto;
+  }
+
+  .header-inner {
+    min-height: 64px;
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  .brand-name {
+    font-weight: 750;
+    letter-spacing: -0.025em;
+    font-size: 0.98rem;
+  }
+
+  .top-link {
+    color: #f5f7fb;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 650;
+  }
+
+  .top-link:hover {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .anonymous-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 2px;
+    color: #f0f3fa;
+    font-size: 0.86rem;
+    white-space: nowrap;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f0a36c;
+  }
+
+  .page { padding: 34px 0 60px; }
+
+  .hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 24px;
+  }
+
+  h1, h2, h3, p { margin-top: 0; }
+
+  h1 {
+    margin-bottom: 10px;
+    color: #fff;
+    font-size: clamp(1.8rem, 3.5vw, 2.35rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .hero-copy {
+    max-width: 620px;
+    margin-bottom: 0;
+    color: #f0f3fa;
+  }
+
+  .panel {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid rgba(220, 228, 237, 0.9);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--ink);
+    box-shadow: 0 8px 24px rgba(39, 58, 83, 0.07), 0 1px 3px rgba(39, 58, 83, 0.04);
+    transition: box-shadow 160ms ease, border-color 160ms ease;
+  }
+
+  .panel:hover {
+    border-color: rgba(190, 211, 225, 0.95);
+    box-shadow: 0 12px 30px rgba(39, 58, 83, 0.09), 0 2px 5px rgba(39, 58, 83, 0.04);
+  }
+
+  .panel-heading { margin-bottom: 15px; }
+
+  .panel-heading h2, .panel h2 {
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+    letter-spacing: -0.025em;
+  }
+
+  .panel-heading p, .panel-description {
+    margin-bottom: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .embed-frame {
+    display: block;
+    width: 100%;
+    min-height: 600px;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  #surveyContainer {
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .footer {
+    padding-top: 28px;
+    color: #f0f3fa;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  @media (max-width: 560px) {
+    .header-inner, .page { width: min(100% - 28px, 1120px); }
+    .header-inner { min-height: 68px; gap: 10px; }
+    .brand { gap: 12px; flex-wrap: wrap; }
+    .top-link { font-size: 0.82rem; }
+    .anonymous-pill { font-size: 0.76rem; gap: 6px; }
+    .header-actions { gap: 8px; }
+    .page { padding-top: 24px; }
+    .panel { padding: 16px; }
+    .embed-frame { min-height: 600px; }
+  }
+</style>
+  <script src="https://api.alchemer.com/head/surveyjsscript"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="brand" aria-label="Main navigation">
+        <a class="top-link brand-name" href="./index.html">SDK Testing</a>
+        <a class="top-link" href="./survey-embed.html" aria-current="page">Survey Embed</a>
+      </nav>
+      <div class="header-actions">
+        <span class="anonymous-pill"><span class="dot"></span>Survey testing</span>
+      </div>
     </div>
+  </header>
 
-   
+  <main class="page">
+    <section class="hero">
+      <div>
+        <h1>Survey Embed Testing</h1>
+        <p class="hero-copy">A simple testing space for embedding and reviewing Alchemer surveys.</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Embed Area</h2>
+        <p>Use this area to test how a survey appears inside the website.</p>
+      </div>
+
+      <div id="surveyContainer">Survey is embedded below.</div>
+      <!-- This embed code may be restricted to use on a single domain. See https://help.alchemer.com/help/iframe-embed#limit-permitted-domains-for-embeds -->
+      <iframe
+        id="alchemer-embed"
+        class="embed-frame"
+        src="https://survey.alchemer.com/s3/8795209/CSAT-5-Point-Rating"
+        title="Alchemer CSAT 5-Point Rating survey"
+        scrolling="auto"
+        loading="lazy">
+      </iframe>
+    </section>
+
+    <footer class="footer">Matt's Web App · Survey Embed Testing</footer>
+  </main>
+
+  <script>
+    window.addEventListener("message", function(event) {
+      const iframeElem = document.querySelector("#alchemer-embed");
+
+      if (iframeElem && event.data && event.data.caller === "Alchemer") {
+        iframeElem.height = event.data.payload;
+      }
+    });
+  </script>
 </body>
 </html>
