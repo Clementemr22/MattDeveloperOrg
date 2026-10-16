@@ -402,7 +402,7 @@
   <main class="page">
     <section class="hero">
       <div>
-        <h1>SDK Testing</h1>
+        <h1>Matt's Web App</h1>
       </div>
     </section>
 
@@ -586,7 +586,7 @@
       addHistory("ERROR", "Conversation creation failed: " + message);
       showToast("Conversation failed", message);
       document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
-        button.disabled = false;
+        button.disabled = true;
       });
     }
 
@@ -595,7 +595,7 @@
       const start = Date.now();
       const timer = setInterval(() => {
         const sdk = window.ApptentiveSDK;
-        if (sdk && sdk.version && typeof sdk.createConversation === "function") {
+        if (sdk && typeof sdk.createConversation === "function") {
           clearInterval(timer);
           state.sdkReady = true;
           setStatus("sdkStatus", "Available", "tone-good");
@@ -665,34 +665,24 @@
     }
 
     function openMessageCenter() {
-      const sdk = window.ApptentiveSDK;
-
-      if (!state.sdkReady || !sdk || typeof sdk.showMessageCenter !== "function") {
-        showToast("SDK not ready", "Wait until the Apptentive SDK has fully initialized.");
-        addHistory("ERROR", "Message Center was not opened because the SDK is not fully initialized");
-        return;
-      }
-
       if (!state.conversationReady) {
-        showToast("Conversation not ready", "Wait until the anonymous conversation is ready, then try again.");
-        addHistory("ERROR", "Message Center requested before conversation creation completed");
+        showToast("SDK not ready", "Wait until the anonymous conversation is ready.");
         return;
       }
 
       try {
-        sdk.showMessageCenter();
+        window.ApptentiveSDK.showMessageCenter();
         addHistory("TOOL", "Requested Message Center");
-        showToast("Message Center requested", "If it does not open, check the Message Center events below and your Apptentive configuration.");
+        showToast("Message Center requested", "It will appear only if the SDK and account configuration allow it.");
       } catch (error) {
         addHistory("ERROR", "Message Center failed: " + (error.message || error));
         showToast("Message Center failed", error.message || "Unknown SDK error");
-        console.error(error);
       }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
-        button.disabled = false;
+        button.disabled = true;
       });
 
       document.querySelectorAll(".sdk-action").forEach(button => {
@@ -734,18 +724,6 @@
         addHistory("SDK ERROR", message);
       });
       document.addEventListener("apptentive:render:interaction", () => addHistory("INTERACTION", "Apptentive rendered an interaction"));
-      document.addEventListener("apptentive:message-center:launch", () => {
-        addHistory("MESSAGE CENTER", "Message Center opened");
-        showToast("Message Center opened", "The SDK launched Message Center.");
-      });
-      document.addEventListener("apptentive:message-center:close", () => addHistory("MESSAGE CENTER", "Message Center closed"));
-      document.addEventListener("apptentive:message-center:dismiss", () => addHistory("MESSAGE CENTER", "Message Center dismissed"));
-      document.addEventListener("apptentive:message-center:error", event => {
-        const detail = event.detail;
-        const message = detail && detail.message ? detail.message : "The SDK reported a Message Center error";
-        addHistory("ERROR", "Message Center: " + message);
-        showToast("Message Center error", message);
-      });
       [
         "apptentive:love-dialog:launch",
         "apptentive:love-dialog:yes",
