@@ -296,7 +296,7 @@
       .panel-heading { gap: 10px; }
     }
     body {
-      background: linear-gradient(to bottom, #658ca6 0%, #afb7bd 100%);
+      background: linear-gradient(to bottom, #47728f 0%, #8697a3 100%);
       color: #f5f7fb;
       background-attachment: fixed;
     }
@@ -595,7 +595,7 @@
       const start = Date.now();
       const timer = setInterval(() => {
         const sdk = window.ApptentiveSDK;
-        if (sdk && typeof sdk.createConversation === "function") {
+        if (sdk && sdk.version && typeof sdk.createConversation === "function") {
           clearInterval(timer);
           state.sdkReady = true;
           setStatus("sdkStatus", "Available", "tone-good");
@@ -665,18 +665,28 @@
     }
 
     function openMessageCenter() {
+      const sdk = window.ApptentiveSDK;
+
+      if (!state.sdkReady || !sdk || typeof sdk.showMessageCenter !== "function") {
+        showToast("SDK not ready", "Wait until the Apptentive SDK has fully initialized.");
+        addHistory("ERROR", "Message Center was not opened because the SDK is not fully initialized");
+        return;
+      }
+
       if (!state.conversationReady) {
-        showToast("SDK not ready", "Wait until the anonymous conversation is ready.");
+        showToast("Conversation not ready", "Wait until the anonymous conversation is ready, then try again.");
+        addHistory("ERROR", "Message Center requested before conversation creation completed");
         return;
       }
 
       try {
-        window.ApptentiveSDK.showMessageCenter();
+        sdk.showMessageCenter();
         addHistory("TOOL", "Requested Message Center");
-        showToast("Message Center requested", "It will appear only if the SDK and account configuration allow it.");
+        showToast("Message Center requested", "If it does not open, check the Message Center events below and your Apptentive configuration.");
       } catch (error) {
         addHistory("ERROR", "Message Center failed: " + (error.message || error));
         showToast("Message Center failed", error.message || "Unknown SDK error");
+        console.error(error);
       }
     }
 
@@ -724,6 +734,18 @@
         addHistory("SDK ERROR", message);
       });
       document.addEventListener("apptentive:render:interaction", () => addHistory("INTERACTION", "Apptentive rendered an interaction"));
+      document.addEventListener("apptentive:message-center:launch", () => {
+        addHistory("MESSAGE CENTER", "Message Center opened");
+        showToast("Message Center opened", "The SDK launched Message Center.");
+      });
+      document.addEventListener("apptentive:message-center:close", () => addHistory("MESSAGE CENTER", "Message Center closed"));
+      document.addEventListener("apptentive:message-center:dismiss", () => addHistory("MESSAGE CENTER", "Message Center dismissed"));
+      document.addEventListener("apptentive:message-center:error", event => {
+        const detail = event.detail;
+        const message = detail && detail.message ? detail.message : "The SDK reported a Message Center error";
+        addHistory("ERROR", "Message Center: " + message);
+        showToast("Message Center error", message);
+      });
       [
         "apptentive:love-dialog:launch",
         "apptentive:love-dialog:yes",
