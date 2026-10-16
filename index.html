@@ -1,758 +1,746 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Testing Website - SDK Testing</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Testing Website — SDK Testing</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #65718a;
+      --line: #e5eaf2;
+      --surface: #ffffff;
+      --canvas: #f5f7fb;
+      --accent: #635bff;
+      --accent-dark: #4c45dc;
+      --green: #16845b;
+      --green-bg: #e9f8f1;
+      --amber: #946200;
+      --amber-bg: #fff5d9;
+      --red: #b42336;
+      --red-bg: #fff0f1;
+      --shadow: 0 14px 38px rgba(25, 38, 68, 0.06);
+    }
 
-    <link rel="stylesheet" href="./styles.css">
+    * { box-sizing: border-box; }
 
-    <script>
-        (function initApptentiveSDK() {
-            var ApptentiveSDK = window.ApptentiveSDK = window.ApptentiveSDK || [];
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 8% 0%, rgba(99, 91, 255, 0.08), transparent 35rem),
+        var(--canvas);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
 
-            if (!ApptentiveSDK.version) {
-                if (!ApptentiveSDK.loaded) {
-                    ApptentiveSDK.loaded = true;
+    button, input { font: inherit; }
+    button { cursor: pointer; }
 
-                    ApptentiveSDK.methods = [
-                        "buildDevice",
-                        "createConversation",
-                        "createMessage",
-                        "engage",
-                        "getSegments",
-                        "identifyPerson",
-                        "setOption",
-                        "setPageName",
-                        "showInteraction",
-                        "showMessageCenter",
-                        "updatePerson"
-                    ];
+    .site-header {
+      border-bottom: 1px solid rgba(229, 234, 242, 0.9);
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-                    ApptentiveSDK.factory = function (t) {
-                        return function () {
-                            var args = Array.prototype.slice.call(arguments);
-                            args.unshift(t);
-                            ApptentiveSDK.push(args);
-                            return ApptentiveSDK;
-                        };
-                    };
+    .header-inner, .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
 
-                    for (var i = 0; i < ApptentiveSDK.methods.length; i++) {
-                        var method = ApptentiveSDK.methods[i];
-                        ApptentiveSDK[method] = ApptentiveSDK.factory(method);
-                    }
-                }
-            }
-        })();
-    </script>
+    .header-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
 
-    <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk"></script>
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
 
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      border-radius: 14px;
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      background: linear-gradient(145deg, #786fff, #4f46df);
+      box-shadow: 0 7px 16px rgba(99, 91, 255, 0.25);
+    }
 
-    <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+    .brand-name { font-weight: 750; letter-spacing: -0.025em; }
+    .brand-caption { color: var(--muted); font-size: 0.8rem; }
 
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .anonymous-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #45516a;
+      background: #fff;
+      font-size: 0.86rem;
+      white-space: nowrap;
+    }
+
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #8b95a8; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 10px 15px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      font-weight: 650;
+      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+    }
+
+    .button:hover { transform: translateY(-1px); }
+    .button:focus-visible, input:focus-visible {
+      outline: 3px solid rgba(99, 91, 255, 0.25);
+      outline-offset: 2px;
+    }
+    .button-primary { color: white; background: var(--accent); box-shadow: 0 5px 12px rgba(99, 91, 255, 0.17); }
+    .button-primary:hover { background: var(--accent-dark); }
+    .button-secondary { color: #39445c; background: #fff; border-color: var(--line); }
+    .button-secondary:hover { background: #f8f9fc; border-color: #cbd3e2; }
+    .button-soft { color: #5148e5; background: #f0efff; }
+    .button-danger { color: var(--red); background: #fff; border-color: #f3d4d9; }
+
+    .page { padding: 42px 0 60px; }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 0.77rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 28px;
+      margin-bottom: 30px;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      line-height: 1.1;
+      letter-spacing: -0.055em;
+    }
+    .hero-copy { max-width: 650px; color: var(--muted); margin-bottom: 0; }
+    .hero-note { color: var(--muted); font-size: 0.82rem; text-align: right; white-space: nowrap; }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .status-card, .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .status-card { padding: 19px; min-width: 0; }
+    .status-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .status-label { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+    .status-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      color: var(--accent);
+      background: #f0efff;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+    .status-value { font-size: 1.1rem; font-weight: 750; letter-spacing: -0.025em; overflow-wrap: anywhere; }
+    .status-detail { margin-top: 5px; color: var(--muted); font-size: 0.79rem; }
+    .status-text { display: inline-flex; align-items: center; gap: 7px; }
+    .status-text::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .tone-neutral { color: #68758d; }
+    .tone-good { color: var(--green); }
+    .tone-warn { color: var(--amber); }
+    .tone-bad { color: var(--red); }
+
+    .main-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr); gap: 20px; align-items: start; }
+    .stack { display: grid; gap: 20px; min-width: 0; }
+    .panel { padding: 24px; min-width: 0; }
+    .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+    .panel-heading h2 { margin-bottom: 5px; font-size: 1.1rem; letter-spacing: -0.025em; }
+    .panel-heading p { margin-bottom: 0; color: var(--muted); font-size: 0.88rem; }
+    .section-kicker { color: var(--muted); font-size: 0.8rem; }
+
+    .event-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .event-button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 78px;
+      padding: 14px;
+      text-align: left;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+    }
+    .event-button:hover { border-color: #c6c2ff; background: #fbfaff; transform: translateY(-1px); }
+    .event-button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .event-symbol { display: grid; place-items: center; flex: 0 0 auto; width: 38px; height: 38px; border-radius: 12px; color: var(--accent); background: #f0efff; font-weight: 800; }
+    .event-title { display: block; font-size: 0.9rem; font-weight: 750; }
+    .event-description { display: block; margin-top: 2px; color: var(--muted); font-size: 0.77rem; font-weight: 450; }
+
+    .custom-event { display: flex; gap: 10px; }
+    .text-input {
+      width: 100%;
+      min-width: 0;
+      min-height: 44px;
+      padding: 10px 13px;
+      color: var(--ink);
+      border: 1px solid #dce2ed;
+      border-radius: 11px;
+      background: #fff;
+    }
+    .helper { color: var(--muted); font-size: 0.8rem; margin: 10px 0 0; }
+
+    .event-list { display: grid; gap: 0; }
+    .event-entry {
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr);
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid #edf0f5;
+      font-size: 0.86rem;
+    }
+    .event-entry:last-child { border-bottom: 0; padding-bottom: 0; }
+    .event-time { color: #8993a6; font-size: 0.75rem; padding-top: 2px; }
+    .event-type { display: block; margin-bottom: 2px; color: #39445c; font-weight: 750; }
+    .event-message { color: var(--muted); overflow-wrap: anywhere; }
+    .empty-state { padding: 18px 0 4px; color: var(--muted); font-size: 0.88rem; }
+
+    .tool-list { display: grid; gap: 10px; }
+    .tool-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid #edf0f5; }
+    .tool-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .tool-row strong { display: block; font-size: 0.88rem; }
+    .tool-row span { color: var(--muted); font-size: 0.78rem; }
+    .tool-row .button { flex: 0 0 auto; min-height: 37px; padding: 7px 11px; font-size: 0.82rem; }
+
+    .notice { margin-top: 22px; padding: 14px 16px; border: 1px solid #e6e2ff; border-radius: 13px; color: #4d478c; background: #f7f6ff; font-size: 0.83rem; }
+    .notice strong { display: block; margin-bottom: 3px; }
+    .footer { padding-top: 28px; color: #8993a6; font-size: 0.78rem; text-align: center; }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 20;
+      width: min(390px, calc(100% - 44px));
+      padding: 15px 17px;
+      color: #fff;
+      background: #20283a;
+      border-radius: 14px;
+      box-shadow: 0 16px 36px rgba(20, 28, 48, 0.24);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+    .toast.visible { opacity: 1; transform: translateY(0); }
+    .toast strong { display: block; margin-bottom: 3px; }
+    .toast span { color: #d6dbea; font-size: 0.86rem; }
+
+    @media (max-width: 900px) {
+      .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .main-grid { grid-template-columns: 1fr; }
+      .hero { align-items: flex-start; flex-direction: column; }
+      .hero-note { text-align: left; }
+    }
+
+    @media (max-width: 560px) {
+      .header-inner, .page { width: min(100% - 28px, 1120px); }
+      .header-inner { min-height: 68px; gap: 10px; }
+      .brand-caption, .anonymous-pill { display: none; }
+      .brand-mark { width: 38px; height: 38px; }
+      .page { padding-top: 30px; }
+      .status-grid { gap: 10px; }
+      .status-card { padding: 14px; }
+      .status-value { font-size: 1rem; }
+      .panel { padding: 18px; }
+      .event-buttons { grid-template-columns: 1fr; }
+      .custom-event { flex-direction: column; }
+      .custom-event .button { width: 100%; }
+      .panel-heading { gap: 10px; }
+    }
+  </style>
+
+  <script>
+    (function initApptentiveSDK() {
+      var sdk = window.ApptentiveSDK = window.ApptentiveSDK || [];
+
+      if (!sdk.version && !sdk.loaded) {
+        sdk.loaded = true;
+        sdk.methods = [
+          "buildDevice",
+          "createConversation",
+          "createMessage",
+          "engage",
+          "getSegments",
+          "identifyPerson",
+          "setOption",
+          "setPageName",
+          "showInteraction",
+          "showMessageCenter",
+          "updatePerson",
+          "canShowInteraction"
+        ];
+
+        sdk.factory = function (methodName) {
+          return function () {
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift(methodName);
+            sdk.push(args);
+            return sdk;
+          };
+        };
+
+        for (var i = 0; i < sdk.methods.length; i++) {
+          sdk[sdk.methods[i]] = sdk.factory(sdk.methods[i]);
+        }
+      }
+    })();
+  </script>
+  <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk"></script>
 </head>
 
 <body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">T</div>
+        <div>
+          <div class="brand-name">Testing Website</div>
+          <div class="brand-caption">SDK integration workspace</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="anonymous-pill"><span class="dot"></span> Anonymous session</div>
+        <button class="button button-primary" id="loginButton" type="button">Sign In <span aria-hidden="true">↗</span></button>
+      </div>
+    </div>
+  </header>
 
-    <div class="container">
+  <main class="page">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Developer tools / SDK testing</p>
+        <h1>Interaction testing,<br>without the guesswork.</h1>
+        <p class="hero-copy">Test Apptentive events, check interaction eligibility, and monitor SDK activity in one place. This page starts as an anonymous visitor.</p>
+      </div>
+      <div class="hero-note">Environment: <strong>Test website</strong><br>Identity: <strong>Anonymous</strong></div>
+    </section>
 
-        <nav class="card">
-            <a href="index.html">SDK Testing</a>
-            |
-            <a href="survey-embed.html">Survey Embed Testing</a>
-        </nav>
+    <section class="status-grid" aria-label="SDK status">
+      <article class="status-card">
+        <div class="status-top"><span class="status-label">SDK status</span><span class="status-icon">⌁</span></div>
+        <div class="status-value"><span id="sdkStatus" class="status-text tone-warn">Loading</span></div>
+        <div class="status-detail" id="sdkDetail">Waiting for SDK initialization</div>
+      </article>
+      <article class="status-card">
+        <div class="status-top"><span class="status-label">Conversation</span><span class="status-icon">◉</span></div>
+        <div class="status-value"><span id="conversationStatus" class="status-text tone-neutral">Waiting</span></div>
+        <div class="status-detail">Anonymous conversation</div>
+      </article>
+      <article class="status-card">
+        <div class="status-top"><span class="status-label">SDK session ID</span><span class="status-icon">#</span></div>
+        <div class="status-value" id="sessionId">Not available</div>
+        <div class="status-detail">Reported by the SDK, when available</div>
+      </article>
+      <article class="status-card">
+        <div class="status-top"><span class="status-label">Last event</span><span class="status-icon">↗</span></div>
+        <div class="status-value" id="lastEvent">None yet</div>
+        <div class="status-detail">Most recent test event</div>
+      </article>
+    </section>
 
-        <header class="header-bar">
+    <div class="main-grid">
+      <div class="stack">
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Quick test events</h2>
+              <p>Send an event to Apptentive using the current anonymous conversation.</p>
+            </div>
+            <span class="section-kicker">01 / Events</span>
+          </div>
+          <div class="event-buttons">
+            <button class="event-button sdk-action" type="button" data-event="test-survey">
+              <span class="event-symbol">▤</span><span><span class="event-title">Test survey</span><span class="event-description">Trigger your survey campaign</span></span>
+            </button>
+            <button class="event-button sdk-action" type="button" data-event="test-prompt">
+              <span class="event-symbol">✦</span><span><span class="event-title">Test prompt</span><span class="event-description">Check a configured prompt</span></span>
+            </button>
+            <button class="event-button sdk-action" type="button" data-event="test-love-dialog" data-love="true">
+              <span class="event-symbol">♡</span><span><span class="event-title">Love Dialog</span><span class="event-description">Check eligibility, then send event</span></span>
+            </button>
+            <button class="event-button" type="button" id="messageCenterButton">
+              <span class="event-symbol">☰</span><span><span class="event-title">Message Center</span><span class="event-description">Open if configured and available</span></span>
+            </button>
+          </div>
+          <div class="notice">
+            <strong>Interaction reminder</strong>
+            Sending an event does not guarantee that an interaction appears. The event name and its targeting, campaign rules, and frequency limits must match your Apptentive configuration.
+          </div>
+        </section>
 
-    <div>
-        <h1>Testing Website (test!)</h1>
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Custom event</h2>
+              <p>Send your own event name for testing.</p>
+            </div>
+            <span class="section-kicker">02 / Custom</span>
+          </div>
+          <form class="custom-event" id="customEventForm">
+            <input class="text-input" id="customEvent" type="text" maxlength="120" placeholder="e.g. checkout-started" aria-label="Custom event name" required>
+            <button class="button button-primary" type="submit">Send event <span aria-hidden="true">→</span></button>
+          </form>
+          <p class="helper">Use the exact event name configured in your Apptentive dashboard.</p>
+        </section>
+      </div>
 
-        <p class="subtitle">
-            Event Testing • Interaction Validation • Conversation Monitoring
-        </p>
+      <div class="stack">
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Event history</h2>
+              <p>Recent activity from this page.</p>
+            </div>
+            <button class="button button-secondary" type="button" id="clearHistoryButton">Clear</button>
+          </div>
+          <div id="eventHistory" class="event-list" aria-live="polite">
+            <div class="empty-state">Waiting for SDK activity…</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Session & tools</h2>
+              <p>Current visitor and SDK controls.</p>
+            </div>
+            <span class="section-kicker">03 / Tools</span>
+          </div>
+          <div class="tool-list">
+            <div class="tool-row">
+              <div><strong>Visitor identity</strong><span id="identityStatus">Anonymous</span></div>
+              <span class="anonymous-pill"><span class="dot"></span> Anonymous</span>
+            </div>
+            <div class="tool-row">
+              <div><strong>SDK debug mode</strong><span>Write SDK diagnostics to the browser console</span></div>
+              <button class="button button-secondary" id="debugButton" type="button">Enable debug</button>
+            </div>
+            <div class="tool-row">
+              <div><strong>Message Center</strong><span>Open the configured message center</span></div>
+              <button class="button button-soft" id="openMessageCenterButton" type="button">Open</button>
+            </div>
+          </div>
+          <div class="notice">
+            <strong>Sign-in is a placeholder for now</strong>
+            The button is ready for your future authentication flow. No user is authenticated or identified by this page yet.
+          </div>
+        </section>
+      </div>
     </div>
 
-    <div id="authContainer">
+    <footer class="footer">Testing Website · Apptentive Web SDK · Anonymous by default</footer>
+  </main>
 
-        <button
-            id="loginButton"
-            onclick="signInMicrosoft()">
-            Sign In
-        </button>
+  <div class="toast" id="toast" role="status" aria-live="polite"><strong id="toastTitle">Notice</strong><span id="toastMessage"></span></div>
 
-        <span id="userDisplay">
-            Anonymous
-        </span>
+  <script>
+    const state = {
+      sdkReady: false,
+      conversationReady: false,
+      debugEnabled: false,
+      toastTimer: null
+    };
 
-    </div>
+    const $ = (id) => document.getElementById(id);
 
-</header>
+    function setStatus(id, text, tone) {
+      const element = $(id);
+      element.textContent = text;
+      element.className = "status-text " + tone;
+    }
 
-        <main>
+    function addHistory(type, message) {
+      const history = $("eventHistory");
+      const empty = history.querySelector(".empty-state");
+      if (empty) empty.remove();
 
-            <section class="card">
+      const entry = document.createElement("div");
+      entry.className = "event-entry";
 
-                <h2>Status</h2>
+      const time = document.createElement("div");
+      time.className = "event-time";
+      time.textContent = new Date().toLocaleTimeString();
 
-                <div class="status-grid">
+      const body = document.createElement("div");
+      const label = document.createElement("span");
+      label.className = "event-type";
+      label.textContent = type;
 
-                    <div class="status-item">
-                        SDK Status
-                        <div id="sdkLoaded" class="status-value red">
-                            Waiting...
-                        </div>
-                    </div>
+      const description = document.createElement("div");
+      description.className = "event-message";
+      description.textContent = message;
 
-                    <div class="status-item">
-                        Conversation Status
-                        <div id="conversationStatus" class="status-value red">
-                            Not Created
-                        </div>
-                    </div>
+      body.append(label, description);
+      entry.append(time, body);
+      history.prepend(entry);
+    }
 
-                    <div class="status-item">
-                        Conversation ID
-                        <div id="conversationId" class="status-value">
-                            Unknown
-                        </div>
-                    </div>
+    function showToast(title, message) {
+      $("toastTitle").textContent = title;
+      $("toastMessage").textContent = message;
+      $("toast").classList.add("visible");
+      clearTimeout(state.toastTimer);
+      state.toastTimer = setTimeout(() => $("toast").classList.remove("visible"), 4200);
+    }
 
-                    <div class="status-item">
-                        Last Event
-                        <div id="lastEvent" class="status-value">
-                            None
-                        </div>
-                    </div>
+    function setSdkReady() {
+      state.sdkReady = true;
+      setStatus("sdkStatus", "Loaded", "tone-good");
+      $("sdkDetail").textContent = "SDK script initialized";
+      addHistory("SDK", "Apptentive SDK initialization event received");
+    }
 
-                    <div class="status-item">
-                        Identity
-                        <div id="identitySummary" class="status-value">
-                            Anonymous
-                        </div>
-                    </div>
+    function updateSessionId() {
+      const sessionId = window.ApptentiveSDK && window.ApptentiveSDK.session_id;
+      $("sessionId").textContent = sessionId || "Not exposed";
+    }
 
-                    <div class="status-item">
-                        User Type
-                        <div id="userType" class="status-value">
-                            Anonymous
-                        </div>
-                    </div>
+    function setConversationReady(data) {
+      state.conversationReady = true;
+      setStatus("conversationStatus", "Ready", "tone-good");
+      updateSessionId();
+      addHistory("CONVERSATION", "Anonymous conversation is ready for events");
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #openMessageCenterButton, #customEventForm button").forEach(button => {
+        button.disabled = false;
+      });
+      if (data && typeof data === "object") {
+        const possibleId = data.conversation_id || data.conversationId || data.id;
+        if (possibleId) {
+          $("sessionId").textContent = String(possibleId);
+        }
+      }
+    }
 
-                </div>
+    function setConversationFailed(error) {
+      state.conversationReady = false;
+      setStatus("conversationStatus", "Failed", "tone-bad");
+      const message = error && error.message ? error.message : String(error || "Unknown SDK error");
+      addHistory("ERROR", "Conversation creation failed: " + message);
+      showToast("Conversation failed", message);
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #openMessageCenterButton, #customEventForm button").forEach(button => {
+        button.disabled = true;
+      });
+    }
 
-            </section>
+    function waitForSdkAndCreateConversation() {
+      addHistory("SYSTEM", "Page loaded; starting anonymous SDK session");
+      const start = Date.now();
+      const timer = setInterval(() => {
+        const sdk = window.ApptentiveSDK;
+        if (sdk && typeof sdk.createConversation === "function") {
+          clearInterval(timer);
+          state.sdkReady = true;
+          setStatus("sdkStatus", "Available", "tone-good");
+          $("sdkDetail").textContent = "SDK command interface detected";
+          addHistory("SDK", "SDK command interface detected");
 
-            <section class="card">
+          try {
+            sdk.createConversation({
+              success: function (data) {
+                setConversationReady(data);
+              },
+              failure: function (error) {
+                setConversationFailed(error);
+              }
+            });
+            addHistory("SYSTEM", "Requested anonymous conversation");
+          } catch (error) {
+            setConversationFailed(error);
+          }
+        } else if (Date.now() - start > 15000) {
+          clearInterval(timer);
+          setStatus("sdkStatus", "Unavailable", "tone-bad");
+          $("sdkDetail").textContent = "SDK did not initialize within 15 seconds";
+          addHistory("ERROR", "SDK was not available before timeout. Check the network tab, script URL, app key, and browser console.");
+          showToast("SDK unavailable", "Check that the Apptentive SDK script can load.");
+        }
+      }, 250);
+    }
 
-                <h2>Quick Test Events</h2>
+    function sendEvent(eventName, isLoveDialog) {
+      if (!state.conversationReady) {
+        addHistory("ERROR", "Cannot send '" + eventName + "' until the anonymous conversation is ready");
+        showToast("SDK not ready", "Wait until the conversation status says Ready.");
+        return;
+      }
 
-                <div class="button-grid">
+      const sdk = window.ApptentiveSDK;
+      let eligible = null;
 
-                    <button onclick="sendEvent('test-survey')">
-                        Test Survey
-                    </button>
+      try {
+        if (isLoveDialog && typeof sdk.canShowInteraction === "function") {
+          eligible = sdk.canShowInteraction(eventName);
+          addHistory("CHECK", eligible ? "An interaction may be eligible for '" + eventName + "'" : "No eligible interaction was reported for '" + eventName + "'");
+        }
 
-                    <button onclick="sendEvent('test-prompt')">
-                        Test Prompt
-                    </button>
+        sdk.engage(eventName);
+        $("lastEvent").textContent = eventName;
+        addHistory("EVENT", "Sent event: " + eventName);
 
-                    <button onclick="sendEvent('test-love-dialog')">
-                        Love Dialog
-                    </button>
+        if (isLoveDialog) {
+          if (eligible === true) {
+            showToast("Love Dialog event sent", "The SDK reports an eligible interaction. Display still depends on campaign rules.");
+          } else if (eligible === false) {
+            showToast("Event sent; no interaction eligible", "Check the event name, campaign trigger, targeting, and frequency limits.");
+          } else {
+            showToast("Love Dialog event sent", "Eligibility checking is not available in this SDK instance.");
+          }
+        } else {
+          showToast("Event sent", eventName);
+        }
+      } catch (error) {
+        addHistory("ERROR", "Could not send '" + eventName + "': " + (error.message || error));
+        showToast("Event failed", error.message || "The SDK could not send this event.");
+        console.error(error);
+      }
+    }
 
-                </div>
+    function openMessageCenter() {
+      if (!state.conversationReady) {
+        showToast("SDK not ready", "Wait until the anonymous conversation is ready.");
+        return;
+      }
 
-            </section>
+      try {
+        window.ApptentiveSDK.showMessageCenter();
+        addHistory("TOOL", "Requested Message Center");
+        showToast("Message Center requested", "It will appear only if the SDK and account configuration allow it.");
+      } catch (error) {
+        addHistory("ERROR", "Message Center failed: " + (error.message || error));
+        showToast("Message Center failed", error.message || "Unknown SDK error");
+      }
+    }
 
-            <section class="card">
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #openMessageCenterButton, #customEventForm button").forEach(button => {
+        button.disabled = true;
+      });
 
-                <h2>Custom Event</h2>
+      document.querySelectorAll(".sdk-action").forEach(button => {
+        button.addEventListener("click", () => sendEvent(button.dataset.event, button.dataset.love === "true"));
+      });
 
-                <input
-                    id="customEvent"
-                    type="text"
-                    placeholder="Enter custom event name">
+      $("customEventForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const input = $("customEvent");
+        const eventName = input.value.trim();
+        if (!eventName) return;
+        sendEvent(eventName, false);
+        input.value = "";
+      });
 
-                <button onclick="sendCustomEvent()">
-                    Send Custom Event
-                </button>
+      $("messageCenterButton").addEventListener("click", openMessageCenter);
+      $("openMessageCenterButton").addEventListener("click", openMessageCenter);
 
-            </section>
+      $("clearHistoryButton").addEventListener("click", () => {
+        $("eventHistory").replaceChildren();
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "History cleared. New activity will appear here.";
+        $("eventHistory").append(empty);
+      });
 
-            <section class="card">
+      $("loginButton").addEventListener("click", () => {
+        showToast("Sign-in not configured", "This button is a placeholder until you connect your login provider.");
+        addHistory("AUTH", "Sign In clicked; authentication provider is not configured");
+      });
 
-                <h2>Authentication</h2>
+      $("debugButton").addEventListener("click", () => {
+        const sdk = window.ApptentiveSDK;
+        if (!sdk) {
+          showToast("SDK unavailable", "The SDK object has not loaded yet.");
+          return;
+        }
+        state.debugEnabled = !state.debugEnabled;
+        try {
+          sdk.debug = state.debugEnabled;
+          $("debugButton").textContent = state.debugEnabled ? "Disable debug" : "Enable debug";
+          addHistory("TOOL", "SDK debug mode " + (state.debugEnabled ? "enabled" : "disabled"));
+          showToast("Debug mode " + (state.debugEnabled ? "enabled" : "disabled"), "Additional SDK diagnostics may appear in the browser console.");
+        } catch (error) {
+          showToast("Could not change debug mode", error.message || "Unknown SDK error");
+        }
+      });
 
-                <p>
-                    Anonymous by default. Use the Sign In button in the top-right
-                    to authenticate with Microsoft Entra and create a user-specific
-                    conversation.
-                </p>
-
-                <br>
-
-                <strong>Current User</strong>
-
-                <div id="identityStatus">
-                    Anonymous
-                </div>
-
-            </section>
-
-            <section class="card">
-
-                <h2>Tools</h2>
-
-                <div class="button-grid">
-
-                    <button onclick="openMessageCenter()">
-                        Open Message Center
-                    </button>
-
-                    <button onclick="clearHistory()">
-                        Clear Event History
-                    </button>
-
-                </div>
-
-            </section>
-
-            <section class="card">
-
-                <h2>Event History</h2>
-
-                <div id="eventHistory">
-                    <div class="event-entry">
-                        Waiting for activity...
-                    </div>
-                </div>
-
-            </section>
-
-        </main>
-
-    </div>
-
-    <script>
-
-        let sdkReady = false;
-        let currentUser = null;
-
-        const msalConfig = {
-            auth: {
-                clientId: "YOUR_CLIENT_ID",
-                authority:
-                    "https://login.microsoftonline.com/YOUR_TENANT_ID",
-                redirectUri: window.location.origin
-            }
-        };
-
-        const msalInstance =
-            new msal.PublicClientApplication(msalConfig);
-
-        document.addEventListener("DOMContentLoaded", function () {
-            waitForSdk();
+      document.addEventListener("apptentive:init", setSdkReady);
+      document.addEventListener("apptentive:ready", () => {
+        setSdkReady();
+        updateSessionId();
+      });
+      document.addEventListener("apptentive:error", event => {
+        const detail = event.detail;
+        const message = detail && detail.message ? detail.message : "Apptentive reported an SDK error";
+        addHistory("SDK ERROR", message);
+      });
+      document.addEventListener("apptentive:render:interaction", () => addHistory("INTERACTION", "Apptentive rendered an interaction"));
+      [
+        "apptentive:love-dialog:launch",
+        "apptentive:love-dialog:yes",
+        "apptentive:love-dialog:no",
+        "apptentive:love-dialog:close",
+        "apptentive:love-dialog:dismiss",
+        "apptentive:love-dialog:error"
+      ].forEach(eventName => {
+        document.addEventListener(eventName, event => {
+          const shortName = eventName.replace("apptentive:love-dialog:", "");
+          addHistory("LOVE DIALOG", "Event: " + shortName);
         });
-
-        function waitForSdk() {
-
-            addHistory("SYSTEM", "Waiting for SDK");
-
-            let attempts = 0;
-
-            const timer = setInterval(function () {
-
-                attempts++;
-
-                if (
-                    window.ApptentiveSDK &&
-                    typeof ApptentiveSDK.createConversation === "function"
-                ) {
-
-                    clearInterval(timer);
-
-                    sdkReady = true;
-
-                    document.getElementById("sdkLoaded").innerHTML =
-                        '<span class="green">✓ Loaded</span>';
-
-                    addHistory("SYSTEM", "SDK Loaded");
-
-                    createConversation();
-                }
-
-                if (attempts >= 20 && !sdkReady) {
-
-                    clearInterval(timer);
-
-                    document.getElementById("sdkLoaded").innerHTML =
-                        '<span class="red">✗ Not Loaded</span>';
-
-                    addHistory(
-                        "ERROR",
-                        "SDK not loaded after timeout"
-                    );
-                }
-
-            }, 500);
-        }
-
-        
-
-        function createConversation() {
-
-            try {
-
-                ApptentiveSDK.createConversation();
-
-                document.getElementById(
-                    "conversationStatus"
-                ).innerHTML =
-                    '<span class="green">✓ Created</span>';
-
-                document.getElementById(
-                    "conversationId"
-                ).textContent =
-                    crypto.randomUUID();
-
-                addHistory(
-                    "SYSTEM",
-                    "Anonymous conversation created"
-                );
-
-            } catch (e) {
-
-                document.getElementById(
-                    "conversationStatus"
-                ).innerHTML =
-                    '<span class="red">✗ Failed</span>';
-
-                addHistory(
-                    "ERROR",
-                    e.message
-                );
-
-            }
-
-        }
-
-        async function signInMicrosoft() {
-
-            try {
-
-                const response =
-                    await msalInstance.loginPopup({
-                        scopes: ["User.Read"]
-                    });
-
-                const account =
-                    response.account;
-
-                currentUser = account;
-
-                createAuthenticatedConversation(
-                    account
-                );
-
-            } catch (error) {
-
-                console.error(error);
-
-                addHistory(
-                    "ERROR",
-                    "Microsoft login failed"
-                );
-
-            }
-
-        }
-
-
-        function createAuthenticatedConversation(
-            account
-        ) {
-
-            try {
-
-                /*
-                * Create a NEW conversation
-                * for the authenticated user.
-                */
-
-                ApptentiveSDK.createConversation();
-
-                ApptentiveSDK.identifyPerson({
-                    id: account.localAccountId,
-                    name: account.name,
-                    email: account.username
-                });
-
-                ApptentiveSDK.updatePerson({
-                    custom_data: {
-                        userEmail:
-                            account.username,
-                        authenticated: true,
-                        loginProvider:
-                            "Microsoft Entra",
-                        environment:
-                            "Testing Website"
-                    }
-                });
-
-                document.getElementById(
-                    "userDisplay"
-                ).textContent =
-                    account.username;
-
-                document.getElementById(
-                    "identityStatus"
-                ).textContent =
-                    account.username;
-
-                document.getElementById(
-                    "identitySummary"
-                ).textContent =
-                    account.username;
-
-                document.getElementById(
-                    "userType"
-                ).textContent =
-                    "Authenticated";
-
-                document.getElementById(
-                    "conversationId"
-                ).textContent =
-                    account.localAccountId;
-
-                document.getElementById(
-                    "loginButton"
-                ).textContent =
-                    "Sign Out";
-
-                document.getElementById(
-                    "loginButton"
-                ).onclick =
-                    signOutMicrosoft;
-
-                addHistory(
-                    "IDENTITY",
-                    "Signed in as " +
-                    account.username
-                );
-
-            } catch (error) {
-
-                console.error(error);
-
-                addHistory(
-                    "ERROR",
-                    error.message
-                );
-
-            }
-
-        }
-
-        async function signOutMicrosoft() {
-
-            try {
-
-                const account =
-                    msalInstance.getAllAccounts()[0];
-
-                if (account) {
-
-                    await msalInstance.logoutPopup({
-                        account: account
-                    });
-
-                }
-
-                currentUser = null;
-
-                document.getElementById(
-                    "userDisplay"
-                ).textContent =
-                    "Anonymous";
-
-                document.getElementById(
-                    "identityStatus"
-                ).textContent =
-                    "Anonymous";
-
-                document.getElementById(
-                    "identitySummary"
-                ).textContent =
-                    "Anonymous";
-
-                document.getElementById(
-                    "userType"
-                ).textContent =
-                    "Anonymous";
-
-                document.getElementById(
-                    "loginButton"
-                ).textContent =
-                    "Sign In";
-
-                document.getElementById(
-                    "loginButton"
-                ).onclick =
-                    signInMicrosoft;
-
-                createConversation();
-
-                addHistory(
-                    "IDENTITY",
-                    "Signed out"
-                );
-
-            } catch (error) {
-
-                console.error(error);
-
-            }
-
-        }
-
-        function sendEvent(eventName) {
-
-            if (!sdkReady) {
-
-                addHistory(
-                    "ERROR",
-                    "SDK not loaded"
-                );
-
-                return;
-            }
-
-            try {
-
-                console.log(
-                    "Event Sent:",
-                    eventName
-                );
-
-                ApptentiveSDK.engage(eventName);
-
-                document.getElementById("lastEvent").textContent =
-                    eventName;
-
-                addHistory(
-                    "EVENT",
-                    eventName
-                );
-
-            } catch (e) {
-
-                addHistory(
-                    "ERROR",
-                    e.message
-                );
-
-                console.error(e);
-
-            }
-
-        }
-
-        function sendCustomEvent() {
-
-            const eventName =
-                document.getElementById("customEvent")
-                    .value
-                    .trim();
-
-            if (!eventName) {
-                return;
-            }
-
-            sendEvent(eventName);
-
-            document.getElementById("customEvent").value = "";
-
-        }
-
-        function identifyUser() {
-
-            const userId =
-                document.getElementById("userId")
-                    .value
-                    .trim();
-        
-            const userName =
-                document.getElementById("userName")
-                    .value
-                    .trim();
-        
-            const email =
-                document.getElementById("userEmail")
-                    .value
-                    .trim();
-        
-            if (!userId) {
-        
-                addHistory(
-                    "ERROR",
-                    "User ID is required"
-                );
-        
-                return;
-            }
-        
-            try {
-        
-                ApptentiveSDK.identifyPerson({
-                    id: userId,
-                    name: userName,
-                    email: email
-                });
-                
-                ApptentiveSDK.updatePerson({
-                    custom_data: {
-                        authenticated: true,
-                        department: "Support",
-                        employeeType: "Internal",
-                        environment: "Testing Website"
-                    }
-                });
-                        
-                document.getElementById(
-                    "identityStatus"
-                ).textContent =
-                    userName || userId;
-        
-                document.getElementById(
-                    "identitySummary"
-                ).textContent =
-                    userName || userId;
-        
-                addHistory(
-                    "IDENTITY",
-                    "User identified: " + userId
-                );
-        
-            } catch (e) {
-        
-                addHistory(
-                    "ERROR",
-                    e.message
-                );
-        
-            }
-        
-        }
-
-        function setAnonymous() {
-        
-            document.getElementById(
-                "identityStatus"
-            ).textContent =
-                "Anonymous";
-        
-            document.getElementById(
-                "identitySummary"
-            ).textContent =
-                "Anonymous";
-        
-            document.getElementById(
-                "userId"
-            ).value = "";
-        
-            document.getElementById(
-                "userName"
-            ).value = "";
-        
-            document.getElementById(
-                "userEmail"
-            ).value = "";
-        
-            addHistory(
-                "IDENTITY",
-                "Reset to anonymous state"
-            );
-        
-        }
-
-        function openMessageCenter() {
-
-            try {
-
-                if (
-                    window.ApptentiveSDK &&
-                    typeof ApptentiveSDK.showMessageCenter === "function"
-                ) {
-
-                    ApptentiveSDK.showMessageCenter();
-
-                    addHistory(
-                        "TOOLS",
-                        "Message Center Opened"
-                    );
-                }
-
-            } catch (e) {
-
-                addHistory(
-                    "ERROR",
-                    e.message
-                );
-
-                console.error(e);
-
-            }
-
-        }
-
-        function addHistory(type, message) {
-
-            const history =
-                document.getElementById("eventHistory");
-
-            const placeholder =
-                history.querySelector(".event-entry");
-
-            if (
-                placeholder &&
-                placeholder.textContent.includes("Waiting for activity")
-            ) {
-                history.innerHTML = "";
-            }
-
-            const timestamp =
-                new Date().toLocaleTimeString();
-
-            const entry =
-                document.createElement("div");
-
-            entry.className =
-                "event-entry";
-
-            entry.innerHTML =
-                `<span class="timestamp">${timestamp}</span>
-                <strong>${type}</strong>: ${message}`;
-
-            history.prepend(entry);
-
-        }
-
-        function clearHistory() {
-
-            document.getElementById("eventHistory").innerHTML = "";
-
-            addHistory(
-                "SYSTEM",
-                "History Cleared"
-            );
-
-        }
-
-    </script>
-
+      });
+
+      waitForSdkAndCreateConversation();
+    });
+  </script>
 </body>
-
 </html>
