@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f5f7fb">
+  <meta name="theme-color" content="#101b35">
   <title>SDK Testing — Matt's Web App</title>
   <style>
     :root {
@@ -297,12 +297,19 @@
     }
     body {
       background:
-        radial-gradient(ellipse at 8% 0%, rgba(133, 211, 239, 0.38), transparent 36rem),
-        radial-gradient(ellipse at 92% 8%, rgba(255, 183, 126, 0.32), transparent 32rem),
-        linear-gradient(135deg, #f8fbfd 0%, #fffaf6 52%, #f7fbfd 100%);
-      color: #20242b;
+        radial-gradient(ellipse at 8% 0%, rgba(31, 76, 132, 0.9), transparent 38rem),
+        radial-gradient(ellipse at 92% 8%, rgba(157, 71, 27, 0.78), transparent 34rem),
+        linear-gradient(135deg, #101b35 0%, #20243a 52%, #321f1b 100%);
+      color: #f5f7fb;
       background-attachment: fixed;
     }
+    .brand-name.top-link,
+    .brand .top-link { color: #f5f7fb; }
+    .brand-name.top-link:hover,
+    .brand .top-link:hover { color: #ffffff; }
+    .anonymous-pill { color: #f0f3fa; }
+    .dot { background: #f0a36c; }
+    .hero h1 { color: #ffffff; }
     .header-inner { min-height: 64px; }
     .page { padding-top: 34px; }
     .brand-caption, .eyebrow, .hero-note, .section-kicker,
