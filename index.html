@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f5f7fb">
-  <title>Testing Website — SDK Testing</title>
+  <title>SDK Testing — Matt's Web App</title>
   <style>
     :root {
       color-scheme: light;
@@ -107,6 +107,9 @@
       outline-offset: 2px;
     }
     .button-primary { color: #fff; background: var(--accent); box-shadow: 0 5px 12px rgba(232, 137, 69, 0.18); }
+    .button-small { min-height: 34px; padding: 6px 11px; font-size: 0.82rem; border-radius: 8px; }
+    .top-link { color: #465166; text-decoration: none; font-size: 0.9rem; font-weight: 650; }
+    .top-link:hover { color: #20242b; text-decoration: underline; text-underline-offset: 4px; }
     .button-primary:hover { background: var(--accent-dark); }
     .button-secondary { color: #39445c; background: #fff; border-color: var(--line); }
     .button-secondary:hover { background: #f8f9fc; border-color: #cbd3e2; }
@@ -178,7 +181,7 @@
     .tone-warn { color: var(--amber); }
     .tone-bad { color: var(--red); }
 
-    .main-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr); gap: 20px; align-items: start; }
+    .main-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
     .history-panel { margin-top: 20px; }
     .stack { display: grid; gap: 20px; min-width: 0; }
     .panel { padding: 24px; min-width: 0; }
@@ -279,7 +282,8 @@
       .header-inner, .page { width: min(100% - 28px, 1120px); }
       .header-inner { min-height: 68px; gap: 10px; }
       .brand-caption { display: none; }
-      .anonymous-pill { display: none; }
+      .anonymous-pill { font-size: 0.76rem; gap: 6px; }
+      .header-actions { gap: 8px; }
       .toast { left: 14px; bottom: 14px; width: min(360px, calc(100% - 28px)); }
       .page { padding-top: 30px; }
       .status-grid { gap: 10px; }
@@ -291,14 +295,59 @@
       .custom-event .button { width: 100%; }
       .panel-heading { gap: 10px; }
     }
+    body {
+      background:
+        radial-gradient(ellipse at 8% 0%, rgba(133, 211, 239, 0.38), transparent 36rem),
+        radial-gradient(ellipse at 92% 8%, rgba(255, 183, 126, 0.32), transparent 32rem),
+        linear-gradient(135deg, #f8fbfd 0%, #fffaf6 52%, #f7fbfd 100%);
+      color: #20242b;
+      background-attachment: fixed;
+    }
+    .header-inner { min-height: 64px; }
+    .page { padding-top: 34px; }
+    .brand-caption, .eyebrow, .hero-note, .section-kicker,
+    .status-icon, .event-symbol, .notice, .footer { display: none; }
+    h1 { font-size: clamp(1.8rem, 3.5vw, 2.35rem); letter-spacing: -0.04em; }
+    .hero { margin-bottom: 24px; }
+    .hero-copy { max-width: 620px; }
+    .status-grid { gap: 10px; margin-bottom: 18px; }
+    .status-card, .panel {
+      border: 1px solid rgba(220, 228, 237, 0.9);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 8px 24px rgba(39, 58, 83, 0.07), 0 1px 3px rgba(39, 58, 83, 0.04);
+      transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+    .status-card:hover, .panel:hover {
+      border-color: rgba(190, 211, 225, 0.95);
+      box-shadow: 0 12px 30px rgba(39, 58, 83, 0.09), 0 2px 5px rgba(39, 58, 83, 0.04);
+    }
+    .status-card { padding: 15px 16px; }
+    .status-top { margin-bottom: 7px; }
+    .status-value { font-size: 1rem; }
+    .panel { padding: 20px; }
+    .panel-heading { margin-bottom: 15px; }
+    .event-buttons { gap: 8px; }
+    .event-button { min-height: 64px; padding: 12px; border-radius: 10px; }
+    .event-button:hover { border-color: #cbd2dc; background: #fafbfc; }
+    .button { border-radius: 9px; }
+    .button-primary { background: #e88945; box-shadow: 0 4px 10px rgba(232, 137, 69, 0.16); }
+    .button-primary:hover { background: #cf7130; }
+    .button-soft { background: #f5f6f8; color: #343a46; }
+    .history-panel { margin-top: 18px; }
+    .toast { left: 18px; bottom: 18px; box-shadow: 0 8px 24px rgba(20, 28, 48, 0.12); }
+    @media (max-width: 560px) {
+      .page { padding-top: 24px; }
+      .panel { padding: 16px; }
+      .status-card { padding: 12px; }
+    }
   </style>
 
   <script>
     (function initApptentiveSDK() {
       var sdk = window.ApptentiveSDK = window.ApptentiveSDK || [];
 
-      if (!sdk.version && !sdk.loaded) {
-        sdk.loaded = true;
+      if (!sdk.version) {
         sdk.methods = [
           "buildDevice",
           "createConversation",
@@ -336,14 +385,12 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
-        <div>
-          <div class="brand-name">Testing Website</div>
-          <div class="brand-caption">SDK integration workspace</div>
-        </div>
+        <a class="brand-name top-link" href="index.html">SDK Testing</a>
+        <a class="top-link" href="survey-embed.html">Survey Embed</a>
       </div>
       <div class="header-actions">
-        <div class="anonymous-pill"><span class="dot"></span> Anonymous session</div>
-        <button class="button button-primary" id="loginButton" type="button">Sign In <span aria-hidden="true">↗</span></button>
+        <span class="anonymous-pill"><span class="dot"></span>Anonymous session</span>
+        <button class="button button-secondary button-small" id="loginButton" type="button">Sign In</button>
       </div>
     </div>
   </header>
@@ -351,11 +398,8 @@
   <main class="page">
     <section class="hero">
       <div>
-        <p class="eyebrow">Developer tools / SDK testing</p>
-        <h1>Interaction testing,<br>without the guesswork.</h1>
-        <p class="hero-copy">Test Apptentive events, check interaction eligibility, and monitor SDK activity in one place. This page starts as an anonymous visitor.</p>
+        <h1>Matt's Web App</h1>
       </div>
-      <div class="hero-note">Environment: <strong>Test website</strong><br>Identity: <strong>Anonymous</strong></div>
     </section>
 
     <section class="status-grid" aria-label="SDK status">
@@ -421,41 +465,12 @@
           </div>
           <form class="custom-event" id="customEventForm">
             <input class="text-input" id="customEvent" type="text" maxlength="120" placeholder="e.g. checkout-started" aria-label="Custom event name" required>
-            <button class="button button-primary" type="submit">Send event <span aria-hidden="true">→</span></button>
+            <button class="button button-secondary button-small" type="submit">Send</button>
           </form>
           <p class="helper">Use the exact event name configured in your Apptentive dashboard.</p>
         </section>
       </div>
 
-      <div class="stack">
-        <section class="panel">
-          <div class="panel-heading">
-            <div>
-              <h2>Session & tools</h2>
-              <p>Current visitor and SDK controls.</p>
-            </div>
-            <span class="section-kicker">03 / Tools</span>
-          </div>
-          <div class="tool-list">
-            <div class="tool-row">
-              <div><strong>Visitor identity</strong><span id="identityStatus">Anonymous</span></div>
-              <span class="anonymous-pill"><span class="dot"></span> Anonymous</span>
-            </div>
-            <div class="tool-row">
-              <div><strong>SDK debug mode</strong><span>Write SDK diagnostics to the browser console</span></div>
-              <button class="button button-secondary" id="debugButton" type="button">Enable debug</button>
-            </div>
-            <div class="tool-row">
-              <div><strong>Message Center</strong><span>Open the configured message center</span></div>
-              <button class="button button-soft" id="openMessageCenterButton" type="button">Open</button>
-            </div>
-          </div>
-          <div class="notice">
-            <strong>Sign-in is a placeholder for now</strong>
-            The button is ready for your future authentication flow. No user is authenticated or identified by this page yet.
-          </div>
-        </section>
-      </div>
     </div>
 
     <section class="panel history-panel">
@@ -471,7 +486,7 @@
       </div>
     </section>
 
-    <footer class="footer">Testing Website · Apptentive Web SDK · Anonymous by default</footer>
+    <footer class="footer">Matt's Web App · Apptentive Web SDK</footer>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"><strong id="toastTitle">Notice</strong><span id="toastMessage"></span></div>
@@ -538,12 +553,18 @@
       $("sessionId").textContent = sessionId || "Not exposed";
     }
 
+    function enableSdkControls() {
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
+        button.disabled = false;
+      });
+    }
+
     function setConversationReady(data) {
       state.conversationReady = true;
       setStatus("conversationStatus", "Ready", "tone-good");
       updateSessionId();
       addHistory("CONVERSATION", "Anonymous conversation is ready for events");
-      document.querySelectorAll(".sdk-action, #messageCenterButton, #openMessageCenterButton, #customEventForm button").forEach(button => {
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
         button.disabled = false;
       });
       if (data && typeof data === "object") {
@@ -560,7 +581,7 @@
       const message = error && error.message ? error.message : String(error || "Unknown SDK error");
       addHistory("ERROR", "Conversation creation failed: " + message);
       showToast("Conversation failed", message);
-      document.querySelectorAll(".sdk-action, #messageCenterButton, #openMessageCenterButton, #customEventForm button").forEach(button => {
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
         button.disabled = true;
       });
     }
@@ -576,6 +597,7 @@
           setStatus("sdkStatus", "Available", "tone-good");
           $("sdkDetail").textContent = "SDK command interface detected";
           addHistory("SDK", "SDK command interface detected");
+          enableSdkControls();
 
           try {
             sdk.createConversation({
@@ -601,9 +623,9 @@
     }
 
     function sendEvent(eventName, isLoveDialog) {
-      if (!state.conversationReady) {
-        addHistory("ERROR", "Cannot send '" + eventName + "' until the anonymous conversation is ready");
-        showToast("SDK not ready", "Wait until the conversation status says Ready.");
+      if (!state.sdkReady) {
+        addHistory("ERROR", "Cannot send '" + eventName + "' because the SDK command interface is unavailable");
+        showToast("SDK not ready", "Wait until the SDK status says Available.");
         return;
       }
 
@@ -655,7 +677,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".sdk-action, #messageCenterButton, #openMessageCenterButton, #customEventForm button").forEach(button => {
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
         button.disabled = true;
       });
 
@@ -673,7 +695,6 @@
       });
 
       $("messageCenterButton").addEventListener("click", openMessageCenter);
-      $("openMessageCenterButton").addEventListener("click", openMessageCenter);
 
       $("clearHistoryButton").addEventListener("click", () => {
         $("eventHistory").replaceChildren();
@@ -686,23 +707,6 @@
       $("loginButton").addEventListener("click", () => {
         showToast("Sign-in not configured", "This button is a placeholder until you connect your login provider.");
         addHistory("AUTH", "Sign In clicked; authentication provider is not configured");
-      });
-
-      $("debugButton").addEventListener("click", () => {
-        const sdk = window.ApptentiveSDK;
-        if (!sdk) {
-          showToast("SDK unavailable", "The SDK object has not loaded yet.");
-          return;
-        }
-        state.debugEnabled = !state.debugEnabled;
-        try {
-          sdk.debug = state.debugEnabled;
-          $("debugButton").textContent = state.debugEnabled ? "Disable debug" : "Enable debug";
-          addHistory("TOOL", "SDK debug mode " + (state.debugEnabled ? "enabled" : "disabled"));
-          showToast("Debug mode " + (state.debugEnabled ? "enabled" : "disabled"), "Additional SDK diagnostics may appear in the browser console.");
-        } catch (error) {
-          showToast("Could not change debug mode", error.message || "Unknown SDK error");
-        }
       });
 
       document.addEventListener("apptentive:init", setSdkReady);
