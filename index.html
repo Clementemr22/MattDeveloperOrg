@@ -13,8 +13,11 @@
       --line: #e5eaf2;
       --surface: #ffffff;
       --canvas: #f5f7fb;
-      --accent: #635bff;
-      --accent-dark: #4c45dc;
+      --accent: #e88945;
+      --accent-dark: #cf7130;
+      --sky: #dff3fb;
+      --sky-strong: #b8e5f5;
+      --orange-wash: #fff0e4;
       --green: #16845b;
       --green-bg: #e9f8f1;
       --amber: #946200;
@@ -29,7 +32,8 @@
     body {
       margin: 0;
       background:
-        radial-gradient(ellipse at 8% 0%, rgba(99, 91, 255, 0.08), transparent 35rem),
+        radial-gradient(ellipse at 8% 0%, rgba(133, 211, 239, 0.32), transparent 34rem),
+        radial-gradient(ellipse at 92% 8%, rgba(255, 183, 126, 0.25), transparent 30rem),
         var(--canvas);
       color: var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -40,12 +44,9 @@
     button { cursor: pointer; }
 
     .site-header {
-      border-bottom: 1px solid rgba(229, 234, 242, 0.9);
-      background: rgba(255, 255, 255, 0.86);
-      backdrop-filter: blur(14px);
-      position: sticky;
-      top: 0;
+      position: relative;
       z-index: 10;
+      background: transparent;
     }
 
     .header-inner, .page {
@@ -55,6 +56,7 @@
 
     .header-inner {
       min-height: 76px;
+      padding-top: 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -68,21 +70,7 @@
       min-width: 0;
     }
 
-    .brand-mark {
-      display: grid;
-      place-items: center;
-      width: 42px;
-      height: 42px;
-      flex: 0 0 auto;
-      border-radius: 14px;
-      color: #fff;
-      font-weight: 800;
-      letter-spacing: -0.05em;
-      background: linear-gradient(145deg, #786fff, #4f46df);
-      box-shadow: 0 7px 16px rgba(99, 91, 255, 0.25);
-    }
-
-    .brand-name { font-weight: 750; letter-spacing: -0.025em; }
+    .brand-name { font-weight: 750; letter-spacing: -0.025em; font-size: 0.98rem; }
     .brand-caption { color: var(--muted); font-size: 0.8rem; }
 
     .header-actions { display: flex; align-items: center; gap: 12px; }
@@ -90,11 +78,11 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 12px;
-      border: 1px solid var(--line);
+      padding: 8px 2px;
+      border: 1px solid transparent;
       border-radius: 999px;
       color: #45516a;
-      background: #fff;
+      background: transparent;
       font-size: 0.86rem;
       white-space: nowrap;
     }
@@ -115,20 +103,20 @@
 
     .button:hover { transform: translateY(-1px); }
     .button:focus-visible, input:focus-visible {
-      outline: 3px solid rgba(99, 91, 255, 0.25);
+      outline: 3px solid rgba(75, 167, 201, 0.28);
       outline-offset: 2px;
     }
-    .button-primary { color: white; background: var(--accent); box-shadow: 0 5px 12px rgba(99, 91, 255, 0.17); }
+    .button-primary { color: #fff; background: var(--accent); box-shadow: 0 5px 12px rgba(232, 137, 69, 0.18); }
     .button-primary:hover { background: var(--accent-dark); }
     .button-secondary { color: #39445c; background: #fff; border-color: var(--line); }
     .button-secondary:hover { background: #f8f9fc; border-color: #cbd3e2; }
-    .button-soft { color: #5148e5; background: #f0efff; }
+    .button-soft { color: #a85b24; background: var(--orange-wash); }
     .button-danger { color: var(--red); background: #fff; border-color: #f3d4d9; }
 
     .page { padding: 42px 0 60px; }
     .eyebrow {
       margin: 0 0 10px;
-      color: var(--accent);
+      color: #347f9d;
       font-size: 0.77rem;
       font-weight: 800;
       letter-spacing: 0.12em;
@@ -176,8 +164,8 @@
       width: 34px;
       height: 34px;
       border-radius: 11px;
-      color: var(--accent);
-      background: #f0efff;
+      color: #347f9d;
+      background: var(--sky);
       font-size: 1rem;
       font-weight: 800;
     }
@@ -191,6 +179,7 @@
     .tone-bad { color: var(--red); }
 
     .main-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr); gap: 20px; align-items: start; }
+    .history-panel { margin-top: 20px; }
     .stack { display: grid; gap: 20px; min-width: 0; }
     .panel { padding: 24px; min-width: 0; }
     .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
@@ -212,9 +201,10 @@
       border-radius: 14px;
       transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
     }
-    .event-button:hover { border-color: #c6c2ff; background: #fbfaff; transform: translateY(-1px); }
+    .event-button:hover { border-color: #b8dfea; background: #f8fcfe; transform: translateY(-1px); }
     .event-button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-    .event-symbol { display: grid; place-items: center; flex: 0 0 auto; width: 38px; height: 38px; border-radius: 12px; color: var(--accent); background: #f0efff; font-weight: 800; }
+    .event-symbol { display: grid; place-items: center; flex: 0 0 auto; width: 38px; height: 38px; border-radius: 12px; color: #347f9d; background: var(--sky); font-weight: 800; }
+    .event-button:nth-child(3) .event-symbol { color: #a85b24; background: var(--orange-wash); }
     .event-title { display: block; font-size: 0.9rem; font-weight: 750; }
     .event-description { display: block; margin-top: 2px; color: var(--muted); font-size: 0.77rem; font-weight: 450; }
 
@@ -259,13 +249,14 @@
 
     .toast {
       position: fixed;
-      right: 22px;
+      left: 22px;
       bottom: 22px;
       z-index: 20;
       width: min(390px, calc(100% - 44px));
       padding: 15px 17px;
-      color: #fff;
-      background: #20283a;
+      color: #263344;
+      background: rgba(255, 255, 255, 0.97);
+      border: 1px solid #dce5ee;
       border-radius: 14px;
       box-shadow: 0 16px 36px rgba(20, 28, 48, 0.24);
       opacity: 0;
@@ -275,7 +266,7 @@
     }
     .toast.visible { opacity: 1; transform: translateY(0); }
     .toast strong { display: block; margin-bottom: 3px; }
-    .toast span { color: #d6dbea; font-size: 0.86rem; }
+    .toast span { color: #65718a; font-size: 0.86rem; }
 
     @media (max-width: 900px) {
       .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -287,8 +278,9 @@
     @media (max-width: 560px) {
       .header-inner, .page { width: min(100% - 28px, 1120px); }
       .header-inner { min-height: 68px; gap: 10px; }
-      .brand-caption, .anonymous-pill { display: none; }
-      .brand-mark { width: 38px; height: 38px; }
+      .brand-caption { display: none; }
+      .anonymous-pill { display: none; }
+      .toast { left: 14px; bottom: 14px; width: min(360px, calc(100% - 28px)); }
       .page { padding-top: 30px; }
       .status-grid { gap: 10px; }
       .status-card { padding: 14px; }
@@ -344,7 +336,6 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">T</div>
         <div>
           <div class="brand-name">Testing Website</div>
           <div class="brand-caption">SDK integration workspace</div>
@@ -440,19 +431,6 @@
         <section class="panel">
           <div class="panel-heading">
             <div>
-              <h2>Event history</h2>
-              <p>Recent activity from this page.</p>
-            </div>
-            <button class="button button-secondary" type="button" id="clearHistoryButton">Clear</button>
-          </div>
-          <div id="eventHistory" class="event-list" aria-live="polite">
-            <div class="empty-state">Waiting for SDK activity…</div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading">
-            <div>
               <h2>Session & tools</h2>
               <p>Current visitor and SDK controls.</p>
             </div>
@@ -479,6 +457,19 @@
         </section>
       </div>
     </div>
+
+    <section class="panel history-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Event history</h2>
+          <p>Recent activity from this page.</p>
+        </div>
+        <button class="button button-secondary" type="button" id="clearHistoryButton">Clear</button>
+      </div>
+      <div id="eventHistory" class="event-list" aria-live="polite">
+        <div class="empty-state">Waiting for SDK activity…</div>
+      </div>
+    </section>
 
     <footer class="footer">Testing Website · Apptentive Web SDK · Anonymous by default</footer>
   </main>
