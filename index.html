@@ -270,6 +270,9 @@
     .toast.visible { opacity: 1; transform: translateY(0); }
     .toast strong { display: block; margin-bottom: 3px; }
     .toast span { color: #65718a; font-size: 0.86rem; }
+    .auth-profile { margin-bottom: 20px; }
+    .auth-profile pre { margin: 14px 0 0; padding: 14px; overflow: auto; border-radius: 10px; background: #f6f8fb; color: #39445c; font-size: 0.82rem; }
+    .auth-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
     @media (max-width: 900px) {
       .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -384,6 +387,7 @@
     })();
   </script>
   <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk" onload="window.__apptentiveScriptLoaded = true; window.dispatchEvent(new Event('apptentive-sdk-script-loaded'))" onerror="window.__apptentiveScriptFailed = true; window.dispatchEvent(new Event('apptentive-sdk-script-failed'))"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
 </head>
 
 <body>
@@ -394,8 +398,10 @@
         <a class="top-link" href="survey-embed.html">Survey Embed</a>
       </div>
       <div class="header-actions">
-        <span class="anonymous-pill"><span class="dot"></span>Anonymous session</span>
-        <button class="button button-secondary button-small" id="loginButton" type="button">Sign In</button>
+        <span class="anonymous-pill" id="authStatus"><span class="dot"></span>Signed out</span>
+        <button class="button button-secondary button-small" id="loginButton" type="button">Log In</button>
+        <button class="button button-secondary button-small" id="signupButton" type="button">Sign Up</button>
+        <button class="button button-secondary button-small" id="logoutButton" type="button" hidden>Log Out</button>
       </div>
     </div>
   </header>
@@ -405,6 +411,17 @@
       <div>
         <h1>SDK Testing</h1>
       </div>
+    </section>
+
+    <section class="panel auth-profile" id="authProfilePanel" hidden>
+      <div class="panel-heading">
+        <div>
+          <h2>Auth0 User Profile</h2>
+          <p id="authProfileSummary">Authenticated user details from Auth0.</p>
+        </div>
+        <span class="section-kicker">Authentication</span>
+      </div>
+      <pre id="authUserProfile"></pre>
     </section>
 
     <section class="status-grid" aria-label="SDK status">
@@ -500,7 +517,10 @@
     const state = {
       sdkReady: false,
       conversationRequested: false,
-      toastTimer: null
+      toastTimer: null,
+      auth0Client: null,
+      authUser: null,
+      personIdentified: false
     };
 
     const $ = (id) => document.getElementById(id);
@@ -590,11 +610,12 @@
         sdk.createConversation();
         state.conversationRequested = true;
         setStatus("conversationStatus", "Requested", "tone-good");
-        addHistory("CONVERSATION", "Called createConversation() with no user details to start an anonymous conversation.");
-        $("sdkDetail").textContent = "SDK loaded; anonymous conversation requested";
+        addHistory("CONVERSATION", "Called createConversation() to start the Alchemer conversation.");
+        $("sdkDetail").textContent = "SDK loaded; conversation requested";
         updateSessionId();
         enableSdkControls();
-        showToast("Anonymous conversation requested", "The SDK documentation does not provide a direct conversation-ID callback. Check the console diagnostics.");
+        syncAlchemerIdentity();
+        showToast("Conversation requested", "The Alchemer Web SDK has been asked to start a conversation.");
         if (typeof sdk.doctor === "function") {
           addHistory("DIAGNOSTICS", "Running ApptentiveSDK.doctor(); inspect the browser console for conversation details.");
           sdk.doctor();
@@ -608,6 +629,101 @@
         showToast("Conversation request failed", error.message || "Unknown SDK error");
         console.error(error);
       }
+    }
+
+    function updateAuthUI(user) {
+      state.authUser = user || null;
+      $("authStatus").replaceChildren();
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      $("authStatus").append(dot);
+      $("authStatus").append(document.createTextNode(user ? (user.email || user.name || "Authenticated") : "Signed out"));
+      $("loginButton").hidden = Boolean(user);
+      $("signupButton").hidden = Boolean(user);
+      $("logoutButton").hidden = !user;
+      $("authProfilePanel").hidden = !user;
+      if (user) {
+        $("authProfileSummary").textContent = "Signed in with Auth0. This identity will be associated with the Alchemer person profile.";
+        $("authUserProfile").textContent = JSON.stringify(user, null, 2);
+        addHistory("AUTH", "Authenticated as " + (user.email || user.name || user.sub));
+      } else {
+        $("authUserProfile").textContent = "";
+        $("authProfileSummary").textContent = "Authenticated user details from Auth0.";
+        addHistory("AUTH", "No authenticated Auth0 user.");
+      }
+      syncAlchemerIdentity();
+    }
+
+    function syncAlchemerIdentity() {
+      if (!state.authUser || !state.sdkReady || !state.conversationRequested || state.personIdentified) return;
+      const user = state.authUser;
+      const person = { unique_token: user.sub };
+      if (user.name) person.name = user.name;
+      if (user.email) person.email = user.email;
+      person.custom_data = { auth0_authenticated: true };
+      try {
+        window.ApptentiveSDK.identifyPerson(person);
+        state.personIdentified = true;
+        addHistory("ALCHEMER IDENTITY", "Sent the authenticated Auth0 identity to Alchemer using identifyPerson().");
+        showToast("Alchemer identity updated", "The authenticated user was sent to Alchemer.");
+      } catch (error) {
+        addHistory("ERROR", "Could not identify the Auth0 user in Alchemer: " + (error.message || error));
+        console.error(error);
+      }
+    }
+
+    async function initializeAuth0() {
+      try {
+        if (!window.auth0 || typeof window.auth0.createAuth0Client !== "function") {
+          throw new Error("The Auth0 SDK script did not load.");
+        }
+        state.auth0Client = await window.auth0.createAuth0Client({
+          domain: "dev-q1lngtdo3cgl4m8c.us.auth0.com",
+          clientId: "ZtCJT5jQo3Wegk1GJsSnjG6oA4K2kqm1",
+          authorizationParams: { redirect_uri: window.location.origin }
+        });
+
+        if (window.location.search.includes("error=")) {
+          const params = new URLSearchParams(window.location.search);
+          const message = "Auth0 error: " + (params.get("error_description") || params.get("error"));
+          addHistory("AUTH ERROR", message);
+          showToast("Authentication failed", message);
+          history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        } else if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+          await state.auth0Client.handleRedirectCallback();
+          history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        }
+
+        const isAuthenticated = await state.auth0Client.isAuthenticated();
+        updateAuthUI(isAuthenticated ? await state.auth0Client.getUser() : null);
+        addHistory("AUTH", "Auth0 SDK initialized.");
+      } catch (error) {
+        addHistory("AUTH ERROR", error.message || String(error));
+        showToast("Auth0 initialization failed", error.message || "Check the browser console.");
+        console.error(error);
+      }
+    }
+
+    async function loginWithAuth0(signup) {
+      if (!state.auth0Client) {
+        showToast("Auth0 is loading", "Wait a moment and try again.");
+        return;
+      }
+      try {
+        const options = { authorizationParams: {} };
+        if (signup) options.authorizationParams.screen_hint = "signup";
+        await state.auth0Client.loginWithRedirect(options);
+      } catch (error) {
+        addHistory("AUTH ERROR", "Could not start login: " + (error.message || error));
+        showToast("Login failed", error.message || "Could not start Auth0 login.");
+      }
+    }
+
+    async function logoutFromAuth0() {
+      if (!state.auth0Client) return;
+      state.personIdentified = false;
+      state.authUser = null;
+      state.auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
     }
 
     function sendEvent(eventName, isLoveDialog) {
@@ -679,10 +795,10 @@
         $("eventHistory").append(empty);
       });
 
-      $("loginButton").addEventListener("click", () => {
-        showToast("Sign-in not configured", "This button is a placeholder until you connect your login provider.");
-        addHistory("AUTH", "Sign In clicked; authentication provider is not configured");
-      });
+      $("loginButton").addEventListener("click", () => loginWithAuth0(false));
+      $("signupButton").addEventListener("click", () => loginWithAuth0(true));
+      $("logoutButton").addEventListener("click", logoutFromAuth0);
+      initializeAuth0();
 
       document.addEventListener("apptentive:init", () => {
         addHistory("SDK EVENT", "apptentive:init received");
