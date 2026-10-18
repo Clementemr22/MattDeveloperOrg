@@ -270,9 +270,9 @@
     .toast.visible { opacity: 1; transform: translateY(0); }
     .toast strong { display: block; margin-bottom: 3px; }
     .toast span { color: #65718a; font-size: 0.86rem; }
-    .auth-profile { margin-bottom: 20px; }
-    .auth-profile pre { margin: 14px 0 0; padding: 14px; overflow: auto; border-radius: 10px; background: #f6f8fb; color: #39445c; font-size: 0.82rem; }
     .auth-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .anonymous-pill.authenticated .dot { background: var(--green); }
+    .profile-value { overflow-wrap: anywhere; }
 
     @media (max-width: 900px) {
       .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -343,10 +343,24 @@
     .button-soft { background: #f5f6f8; color: #343a46; }
     .history-panel { margin-top: 18px; }
     .toast { left: 18px; bottom: 18px; box-shadow: 0 8px 24px rgba(20, 28, 48, 0.12); }
+    @media (max-width: 760px) {
+      .header-inner { align-items: flex-start; flex-direction: column; gap: 10px; padding: 14px 0; }
+      .brand { width: 100%; flex-wrap: wrap; gap: 8px 16px; }
+      .header-actions { width: 100%; flex-wrap: wrap; gap: 7px; }
+      .anonymous-pill { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+      .header-actions .button { flex: 0 0 auto; }
+    }
     @media (max-width: 560px) {
       .page { padding-top: 24px; }
       .panel { padding: 16px; }
       .status-card { padding: 12px; }
+      .header-inner, .page { width: calc(100% - 24px); }
+      .brand { gap: 6px 12px; }
+      .brand-name.top-link, .brand .top-link { font-size: 0.84rem; }
+      .header-actions { align-items: center; }
+      .anonymous-pill { flex: 1 1 100%; padding: 2px 0; font-size: 0.8rem; }
+      .header-actions .button { flex: 1 1 auto; min-width: 0; }
+      .status-grid { grid-template-columns: minmax(0, 1fr); }
     }
   </style>
 
@@ -398,7 +412,7 @@
         <a class="top-link" href="survey-embed.html">Survey Embed</a>
       </div>
       <div class="header-actions">
-        <span class="anonymous-pill" id="authStatus"><span class="dot"></span>Signed out</span>
+        <span class="anonymous-pill" id="authStatus"><span class="dot"></span><span id="authStatusText">Signed out</span></span>
         <button class="button button-secondary button-small" id="loginButton" type="button">Log In</button>
         <button class="button button-secondary button-small" id="signupButton" type="button">Sign Up</button>
         <button class="button button-secondary button-small" id="logoutButton" type="button" hidden>Log Out</button>
@@ -413,17 +427,6 @@
       </div>
     </section>
 
-    <section class="panel auth-profile" id="authProfilePanel" hidden>
-      <div class="panel-heading">
-        <div>
-          <h2>Auth0 User Profile</h2>
-          <p id="authProfileSummary">Authenticated user details from Auth0.</p>
-        </div>
-        <span class="section-kicker">Authentication</span>
-      </div>
-      <pre id="authUserProfile"></pre>
-    </section>
-
     <section class="status-grid" aria-label="SDK status">
       <article class="status-card">
         <div class="status-top"><span class="status-label">SDK status</span><span class="status-icon">⌁</span></div>
@@ -432,13 +435,13 @@
       </article>
       <article class="status-card">
         <div class="status-top"><span class="status-label">Conversation</span><span class="status-icon">◉</span></div>
-        <div class="status-value"><span id="conversationStatus" class="status-text tone-neutral">Waiting</span></div>
-        <div class="status-detail">Anonymous conversation</div>
+        <div class="status-value"><span id="conversationStatus" class="status-text tone-neutral">not initialized</span></div>
+        <div class="status-detail">Conversation initialization status</div>
       </article>
       <article class="status-card">
-        <div class="status-top"><span class="status-label">SDK session ID</span><span class="status-icon">#</span></div>
-        <div class="status-value" id="sessionId">Not available</div>
-        <div class="status-detail">Not the same as a conversation ID</div>
+        <div class="status-top"><span class="status-label">Auth0 User Profile</span><span class="status-icon">◎</span></div>
+        <div class="status-value profile-value" id="authProfileValue">Anonymous session</div>
+        <div class="status-detail" id="authProfileDetail">Not signed in</div>
       </article>
       <article class="status-card">
         <div class="status-top"><span class="status-label">Last event</span><span class="status-icon">↗</span></div>
@@ -577,10 +580,9 @@
       });
     }
 
-    function updateSessionId() {
-      const sdk = window.ApptentiveSDK;
-      const sessionId = sdk && sdk.session_id;
-      $("sessionId").textContent = sessionId || "Not exposed";
+    function updateAuthProfile(user) {
+      $("authProfileValue").textContent = user ? (user.email || user.name || user.sub || "Authenticated user") : "Anonymous session";
+      $("authProfileDetail").textContent = user ? (user.name && user.email && user.name !== user.email ? user.name : "Signed in with Auth0") : "Not signed in";
     }
 
     function setSdkLoaded() {
@@ -609,10 +611,9 @@
       try {
         sdk.createConversation();
         state.conversationRequested = true;
-        setStatus("conversationStatus", "Requested", "tone-good");
-        addHistory("CONVERSATION", "Called createConversation() to start the Alchemer conversation.");
-        $("sdkDetail").textContent = "SDK loaded; conversation requested";
-        updateSessionId();
+        setStatus("conversationStatus", "initialized", "tone-good");
+        addHistory("CONVERSATION", "Called createConversation() successfully.");
+        $("sdkDetail").textContent = "SDK loaded; conversation initialized";
         enableSdkControls();
         syncAlchemerIdentity();
         showToast("Conversation requested", "The Alchemer Web SDK has been asked to start a conversation.");
@@ -624,7 +625,7 @@
         }
       } catch (error) {
         state.conversationRequested = false;
-        setStatus("conversationStatus", "Failed", "tone-bad");
+        setStatus("conversationStatus", "not initialized", "tone-bad");
         addHistory("ERROR", "Could not request anonymous conversation: " + (error.message || error));
         showToast("Conversation request failed", error.message || "Unknown SDK error");
         console.error(error);
@@ -633,22 +634,15 @@
 
     function updateAuthUI(user) {
       state.authUser = user || null;
-      $("authStatus").replaceChildren();
-      const dot = document.createElement("span");
-      dot.className = "dot";
-      $("authStatus").append(dot);
-      $("authStatus").append(document.createTextNode(user ? (user.email || user.name || "Authenticated") : "Signed out"));
+      $("authStatus").classList.toggle("authenticated", Boolean(user));
+      $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
+      updateAuthProfile(user);
       $("loginButton").hidden = Boolean(user);
       $("signupButton").hidden = Boolean(user);
       $("logoutButton").hidden = !user;
-      $("authProfilePanel").hidden = !user;
       if (user) {
-        $("authProfileSummary").textContent = "Signed in with Auth0. This identity will be associated with the Alchemer person profile.";
-        $("authUserProfile").textContent = JSON.stringify(user, null, 2);
         addHistory("AUTH", "Authenticated as " + (user.email || user.name || user.sub));
       } else {
-        $("authUserProfile").textContent = "";
-        $("authProfileSummary").textContent = "Authenticated user details from Auth0.";
         addHistory("AUTH", "No authenticated Auth0 user.");
       }
       syncAlchemerIdentity();
@@ -806,7 +800,7 @@
 
       document.addEventListener("apptentive:ready", () => {
         addHistory("SDK EVENT", "apptentive:ready received");
-        updateSessionId();
+        updateAuthProfile(state.authUser);
       });
 
       document.addEventListener("apptentive:error", event => {
