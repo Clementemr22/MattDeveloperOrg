@@ -344,10 +344,10 @@
     .history-panel { margin-top: 18px; }
     .toast { left: 18px; bottom: 18px; box-shadow: 0 8px 24px rgba(20, 28, 48, 0.12); }
     @media (max-width: 760px) {
-      .header-inner { align-items: flex-start; flex-direction: column; gap: 10px; padding: 14px 0; }
-      .brand { width: 100%; flex-wrap: wrap; gap: 8px 16px; }
-      .header-actions { width: 100%; flex-wrap: wrap; gap: 7px; }
-      .anonymous-pill { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+      .header-inner { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; }
+      .brand { width: auto; flex: 0 1 auto; flex-wrap: wrap; gap: 8px 14px; }
+      .header-actions { width: auto; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+      .anonymous-pill { min-width: 0; max-width: 100%; white-space: nowrap; }
       .header-actions .button { flex: 0 0 auto; }
     }
     @media (max-width: 560px) {
@@ -355,12 +355,19 @@
       .panel { padding: 16px; }
       .status-card { padding: 12px; }
       .header-inner, .page { width: calc(100% - 24px); }
-      .brand { gap: 6px 12px; }
-      .brand-name.top-link, .brand .top-link { font-size: 0.84rem; }
-      .header-actions { align-items: center; }
-      .anonymous-pill { flex: 1 1 100%; padding: 2px 0; font-size: 0.8rem; }
-      .header-actions .button { flex: 1 1 auto; min-width: 0; }
-      .status-grid { grid-template-columns: minmax(0, 1fr); }
+      .header-inner { align-items: center; }
+      .brand { gap: 6px 10px; }
+      .brand-name.top-link, .brand .top-link { font-size: 0.82rem; }
+      .header-actions { align-items: center; gap: 6px; }
+      .anonymous-pill { flex: 0 1 auto; padding: 2px 0; font-size: 0.76rem; }
+      .header-actions .button { flex: 0 0 auto; min-width: 0; padding: 8px 10px; font-size: 0.76rem; }
+      .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 390px) {
+      .header-inner { flex-wrap: wrap; }
+      .brand { width: 100%; }
+      .header-actions { width: 100%; justify-content: flex-start; }
+      .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 
@@ -439,7 +446,7 @@
         <div class="status-detail">Conversation initialization status</div>
       </article>
       <article class="status-card">
-        <div class="status-top"><span class="status-label">Auth0 User Profile</span><span class="status-icon">◎</span></div>
+        <div class="status-top"><span class="status-label">User</span><span class="status-icon">◎</span></div>
         <div class="status-value profile-value" id="authProfileValue">Anonymous session</div>
         <div class="status-detail" id="authProfileDetail">Not signed in</div>
       </article>
