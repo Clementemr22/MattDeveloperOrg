@@ -364,7 +364,8 @@
           "showInteraction",
           "showMessageCenter",
           "updatePerson",
-          "canShowInteraction"
+          "canShowInteraction",
+          "doctor"
         ];
 
         sdk.factory = function (methodName) {
@@ -382,7 +383,7 @@
       }
     })();
   </script>
-  <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk"></script>
+  <script async src="https://sdk.apptentive.com/v1/apps/6ac6691ce871ff006e608435/websdk" onload="window.__apptentiveScriptLoaded = true; window.dispatchEvent(new Event('apptentive-sdk-script-loaded'))" onerror="window.__apptentiveScriptFailed = true; window.dispatchEvent(new Event('apptentive-sdk-script-failed'))"></script>
 </head>
 
 <body>
@@ -420,7 +421,7 @@
       <article class="status-card">
         <div class="status-top"><span class="status-label">SDK session ID</span><span class="status-icon">#</span></div>
         <div class="status-value" id="sessionId">Not available</div>
-        <div class="status-detail">Reported by the SDK, when available</div>
+        <div class="status-detail">Not the same as a conversation ID</div>
       </article>
       <article class="status-card">
         <div class="status-top"><span class="status-label">Last event</span><span class="status-icon">↗</span></div>
@@ -498,8 +499,7 @@
   <script>
     const state = {
       sdkReady: false,
-      conversationReady: false,
-      debugEnabled: false,
+      conversationRequested: false,
       toastTimer: null
     };
 
@@ -545,115 +545,87 @@
       state.toastTimer = setTimeout(() => $("toast").classList.remove("visible"), 4200);
     }
 
-    function setSdkReady() {
-      state.sdkReady = true;
-      setStatus("sdkStatus", "Loaded", "tone-good");
-      $("sdkDetail").textContent = "SDK script initialized";
-      addHistory("SDK", "Apptentive SDK initialization event received");
-    }
-
-    function updateSessionId() {
-      const sessionId = window.ApptentiveSDK && window.ApptentiveSDK.session_id;
-      $("sessionId").textContent = sessionId || "Not exposed";
-    }
-
     function enableSdkControls() {
       document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
         button.disabled = false;
       });
     }
 
-    function setConversationReady(data) {
-      state.conversationReady = true;
-      setStatus("conversationStatus", "Ready", "tone-good");
-      updateSessionId();
-      addHistory("CONVERSATION", "Anonymous conversation is ready for events");
-      document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
-        button.disabled = false;
-      });
-      if (data && typeof data === "object") {
-        const possibleId = data.conversation_id || data.conversationId || data.id;
-        if (possibleId) {
-          $("sessionId").textContent = String(possibleId);
-        }
-      }
-    }
-
-    function setConversationFailed(error) {
-      state.conversationReady = false;
-      setStatus("conversationStatus", "Failed", "tone-bad");
-      const message = error && error.message ? error.message : String(error || "Unknown SDK error");
-      addHistory("ERROR", "Conversation creation failed: " + message);
-      showToast("Conversation failed", message);
+    function disableSdkControls() {
       document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
         button.disabled = true;
       });
     }
 
-    function waitForSdkAndCreateConversation() {
-      addHistory("SYSTEM", "Page loaded; starting anonymous SDK session");
-      const start = Date.now();
-      const timer = setInterval(() => {
-        const sdk = window.ApptentiveSDK;
-        if (sdk && typeof sdk.createConversation === "function") {
-          clearInterval(timer);
-          state.sdkReady = true;
-          setStatus("sdkStatus", "Available", "tone-good");
-          $("sdkDetail").textContent = "SDK command interface detected";
-          addHistory("SDK", "SDK command interface detected");
-          enableSdkControls();
+    function updateSessionId() {
+      const sdk = window.ApptentiveSDK;
+      const sessionId = sdk && sdk.session_id;
+      $("sessionId").textContent = sessionId || "Not exposed";
+    }
 
-          try {
-            sdk.createConversation({
-              success: function (data) {
-                setConversationReady(data);
-              },
-              failure: function (error) {
-                setConversationFailed(error);
-              }
-            });
-            addHistory("SYSTEM", "Requested anonymous conversation");
-          } catch (error) {
-            setConversationFailed(error);
-          }
-        } else if (Date.now() - start > 15000) {
-          clearInterval(timer);
-          setStatus("sdkStatus", "Unavailable", "tone-bad");
-          $("sdkDetail").textContent = "SDK did not initialize within 15 seconds";
-          addHistory("ERROR", "SDK was not available before timeout. Check the network tab, script URL, app key, and browser console.");
-          showToast("SDK unavailable", "Check that the Apptentive SDK script can load.");
+    function setSdkLoaded() {
+      if (state.sdkReady) return;
+
+      const sdk = window.ApptentiveSDK;
+      if (!sdk || typeof sdk.createConversation !== "function") {
+        setStatus("sdkStatus", "Unavailable", "tone-bad");
+        $("sdkDetail").textContent = "SDK script loaded, but its API was not found";
+        addHistory("ERROR", "The SDK script loaded but createConversation() was unavailable.");
+        showToast("SDK unavailable", "Check the Website Snippet in Alchemer Settings → API & Development.");
+        return;
+      }
+
+      state.sdkReady = true;
+      setStatus("sdkStatus", "Loaded", "tone-good");
+      $("sdkDetail").textContent = "SDK script loaded";
+      addHistory("SDK", "Alchemer Web SDK script loaded");
+
+      try {
+        sdk.setOption("debug", true);
+      } catch (error) {
+        addHistory("WARNING", "Could not enable SDK debug logging: " + (error.message || error));
+      }
+
+      try {
+        sdk.createConversation();
+        state.conversationRequested = true;
+        setStatus("conversationStatus", "Requested", "tone-good");
+        addHistory("CONVERSATION", "Called createConversation() with no user details to start an anonymous conversation.");
+        $("sdkDetail").textContent = "SDK loaded; anonymous conversation requested";
+        updateSessionId();
+        enableSdkControls();
+        showToast("Anonymous conversation requested", "The SDK documentation does not provide a direct conversation-ID callback. Check the console diagnostics.");
+        if (typeof sdk.doctor === "function") {
+          addHistory("DIAGNOSTICS", "Running ApptentiveSDK.doctor(); inspect the browser console for conversation details.");
+          sdk.doctor();
+        } else {
+          addHistory("DIAGNOSTICS", "For conversation details, run ApptentiveSDK.doctor() in the browser console.");
         }
-      }, 250);
+      } catch (error) {
+        state.conversationRequested = false;
+        setStatus("conversationStatus", "Failed", "tone-bad");
+        addHistory("ERROR", "Could not request anonymous conversation: " + (error.message || error));
+        showToast("Conversation request failed", error.message || "Unknown SDK error");
+        console.error(error);
+      }
     }
 
     function sendEvent(eventName, isLoveDialog) {
-      if (!state.sdkReady) {
-        addHistory("ERROR", "Cannot send '" + eventName + "' because the SDK command interface is unavailable");
-        showToast("SDK not ready", "Wait until the SDK status says Available.");
+      if (!state.sdkReady || !state.conversationRequested) {
+        addHistory("ERROR", "Cannot send '" + eventName + "' before the anonymous conversation has been requested.");
+        showToast("Conversation not ready", "Wait for the conversation request to complete.");
         return;
       }
 
       const sdk = window.ApptentiveSDK;
-      let eligible = null;
 
       try {
-        if (isLoveDialog && typeof sdk.canShowInteraction === "function") {
-          eligible = sdk.canShowInteraction(eventName);
-          addHistory("CHECK", eligible ? "An interaction may be eligible for '" + eventName + "'" : "No eligible interaction was reported for '" + eventName + "'");
-        }
-
         sdk.engage(eventName);
         $("lastEvent").textContent = eventName;
-        addHistory("EVENT", "Sent event: " + eventName);
+        addHistory("EVENT", "Called engage('" + eventName + "')");
 
         if (isLoveDialog) {
-          if (eligible === true) {
-            showToast("Love Dialog event sent", "The SDK reports an eligible interaction. Display still depends on campaign rules.");
-          } else if (eligible === false) {
-            showToast("Event sent; no interaction eligible", "Check the event name, campaign trigger, targeting, and frequency limits.");
-          } else {
-            showToast("Love Dialog event sent", "Eligibility checking is not available in this SDK instance.");
-          }
+          showToast("Love Dialog event sent", "The interaction appears only if a matching campaign is configured and eligible.");
         } else {
           showToast("Event sent", eventName);
         }
@@ -665,25 +637,24 @@
     }
 
     function openMessageCenter() {
-      if (!state.conversationReady) {
-        showToast("SDK not ready", "Wait until the anonymous conversation is ready.");
+      if (!state.sdkReady || !state.conversationRequested) {
+        showToast("Conversation not ready", "Wait until the anonymous conversation has been requested.");
         return;
       }
 
       try {
         window.ApptentiveSDK.showMessageCenter();
-        addHistory("TOOL", "Requested Message Center");
-        showToast("Message Center requested", "It will appear only if the SDK and account configuration allow it.");
+        addHistory("MESSAGE CENTER", "Called ApptentiveSDK.showMessageCenter()");
+        showToast("Message Center requested", "Whether it appears depends on SDK loading and account configuration.");
       } catch (error) {
         addHistory("ERROR", "Message Center failed: " + (error.message || error));
         showToast("Message Center failed", error.message || "Unknown SDK error");
+        console.error(error);
       }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
-        button.disabled = true;
-      });
+      disableSdkControls();
 
       document.querySelectorAll(".sdk-action").forEach(button => {
         button.addEventListener("click", () => sendEvent(button.dataset.event, button.dataset.love === "true"));
@@ -713,32 +684,54 @@
         addHistory("AUTH", "Sign In clicked; authentication provider is not configured");
       });
 
-      document.addEventListener("apptentive:init", setSdkReady);
+      document.addEventListener("apptentive:init", () => {
+        addHistory("SDK EVENT", "apptentive:init received");
+      });
+
       document.addEventListener("apptentive:ready", () => {
-        setSdkReady();
+        addHistory("SDK EVENT", "apptentive:ready received");
         updateSessionId();
       });
+
       document.addEventListener("apptentive:error", event => {
         const detail = event.detail;
         const message = detail && detail.message ? detail.message : "Apptentive reported an SDK error";
         addHistory("SDK ERROR", message);
       });
-      document.addEventListener("apptentive:render:interaction", () => addHistory("INTERACTION", "Apptentive rendered an interaction"));
+
+      document.addEventListener("apptentive:render:interaction", () => {
+        addHistory("INTERACTION", "Apptentive rendered an interaction");
+      });
+
       [
         "apptentive:love-dialog:launch",
         "apptentive:love-dialog:yes",
         "apptentive:love-dialog:no",
         "apptentive:love-dialog:close",
         "apptentive:love-dialog:dismiss",
-        "apptentive:love-dialog:error"
+        "apptentive:love-dialog:error",
+        "apptentive:message-center:send"
       ].forEach(eventName => {
-        document.addEventListener(eventName, event => {
-          const shortName = eventName.replace("apptentive:love-dialog:", "");
-          addHistory("LOVE DIALOG", "Event: " + shortName);
+        document.addEventListener(eventName, () => {
+          addHistory("SDK EVENT", eventName);
         });
       });
 
-      waitForSdkAndCreateConversation();
+      addHistory("SYSTEM", "Page loaded; waiting for the Alchemer Web SDK script.");
+      if (window.__apptentiveScriptLoaded) {
+        setSdkLoaded();
+      } else if (window.__apptentiveScriptFailed) {
+        setStatus("sdkStatus", "Unavailable", "tone-bad");
+        $("sdkDetail").textContent = "SDK script failed to load";
+        addHistory("ERROR", "The Alchemer Web SDK script failed to load.");
+      } else {
+        window.addEventListener("apptentive-sdk-script-loaded", setSdkLoaded, { once: true });
+        window.addEventListener("apptentive-sdk-script-failed", () => {
+          setStatus("sdkStatus", "Unavailable", "tone-bad");
+          $("sdkDetail").textContent = "SDK script failed to load";
+          addHistory("ERROR", "The Alchemer Web SDK script failed to load. Check the network tab and Website Snippet.");
+        }, { once: true });
+      }
     });
   </script>
 </body>
