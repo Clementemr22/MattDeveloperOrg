@@ -523,7 +523,10 @@
       toastTimer: null,
       auth0Client: null,
       authUser: null,
-      personIdentified: false
+      authReady: false,
+      personIdentified: false,
+      conversationStarting: false,
+      conversationIdentity: ""
     };
 
     const $ = (id) => document.getElementById(id);
@@ -608,15 +611,40 @@
         addHistory("WARNING", "Could not enable SDK debug logging: " + (error.message || error));
       }
 
+      startAlchemerConversation();
+    }
+
+    function startAlchemerConversation() {
+      if (!state.sdkReady || !state.authReady || state.conversationStarting) return;
+
+      const sdk = window.ApptentiveSDK;
+      const user = state.authUser;
+      const email = user && user.email ? user.email.trim().toLowerCase() : "";
+      const identityChanged = Boolean(email && (!state.personIdentified || email !== state.conversationIdentity));
+
+      if (identityChanged) {
+        identifyAlchemerUser(user);
+      }
+
+      if (state.conversationRequested && !identityChanged) return;
+
+      state.conversationStarting = true;
+      setStatus("conversationStatus", "initializing", "tone-neutral");
+
       try {
         sdk.createConversation();
         state.conversationRequested = true;
+        state.conversationStarting = false;
+        state.conversationIdentity = email || "anonymous";
         setStatus("conversationStatus", "initialized", "tone-good");
-        addHistory("CONVERSATION", "Called createConversation() successfully.");
         $("sdkDetail").textContent = "SDK loaded; conversation initialized";
         enableSdkControls();
-        syncAlchemerIdentity();
-        showToast("Conversation requested", "The Alchemer Web SDK has been asked to start a conversation.");
+        addHistory("CONVERSATION", email ? "Conversation requested for the signed-in Auth0 user." : "Anonymous conversation requested.");
+
+        if (identityChanged) {
+          addHistory("CONVERSATION", "A conversation request was made after identifying the signed-in user.");
+        }
+
         if (typeof sdk.doctor === "function") {
           addHistory("DIAGNOSTICS", "Running ApptentiveSDK.doctor(); inspect the browser console for conversation details.");
           sdk.doctor();
@@ -624,15 +652,19 @@
           addHistory("DIAGNOSTICS", "For conversation details, run ApptentiveSDK.doctor() in the browser console.");
         }
       } catch (error) {
+        state.conversationStarting = false;
         state.conversationRequested = false;
         setStatus("conversationStatus", "not initialized", "tone-bad");
-        addHistory("ERROR", "Could not request anonymous conversation: " + (error.message || error));
-        showToast("Conversation request failed", error.message || "Unknown SDK error");
+        addHistory("ERROR", "Conversation initialization failed: " + ((error && error.message) || error || "Unknown SDK error"));
+        showToast("Conversation initialization failed", (error && error.message) || "The SDK could not initialize a conversation.");
         console.error(error);
       }
     }
 
     function updateAuthUI(user) {
+      const previousEmail = state.authUser && state.authUser.email ? state.authUser.email.trim().toLowerCase() : "";
+      const nextEmail = user && user.email ? user.email.trim().toLowerCase() : "";
+      if (previousEmail !== nextEmail) state.personIdentified = false;
       state.authUser = user || null;
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
@@ -645,24 +677,37 @@
       } else {
         addHistory("AUTH", "No authenticated Auth0 user.");
       }
-      syncAlchemerIdentity();
+      startAlchemerConversation();
     }
 
-    function syncAlchemerIdentity() {
-      if (!state.authUser || !state.sdkReady || !state.conversationRequested || state.personIdentified) return;
-      const user = state.authUser;
-      const person = { unique_token: user.sub };
-      if (user.name) person.name = user.name;
-      if (user.email) person.email = user.email;
-      person.custom_data = { auth0_authenticated: true };
+    function identifyAlchemerUser(user) {
+      if (!user || !user.email) return false;
+
+      const email = user.email.trim().toLowerCase();
+      const name = (user.name || user.nickname || "").trim();
+      const person = {
+        unique_token: email,
+        email: email,
+        custom_data: {
+          customer_id: email,
+          email: email
+        }
+      };
+
+      if (name) {
+        person.name = name;
+        person.custom_data.name = name;
+      }
+
       try {
         window.ApptentiveSDK.identifyPerson(person);
         state.personIdentified = true;
-        addHistory("ALCHEMER IDENTITY", "Sent the authenticated Auth0 identity to Alchemer using identifyPerson().");
-        showToast("Alchemer identity updated", "The authenticated user was sent to Alchemer.");
+        addHistory("ALCHEMER IDENTITY", "Identified the Alchemer person using the Auth0 email and sent email/name custom data.");
+        return true;
       } catch (error) {
         addHistory("ERROR", "Could not identify the Auth0 user in Alchemer: " + (error.message || error));
         console.error(error);
+        return false;
       }
     }
 
@@ -690,8 +735,13 @@
 
         const isAuthenticated = await state.auth0Client.isAuthenticated();
         updateAuthUI(isAuthenticated ? await state.auth0Client.getUser() : null);
+        state.authReady = true;
+        startAlchemerConversation();
         addHistory("AUTH", "Auth0 SDK initialized.");
       } catch (error) {
+        state.authReady = true;
+        state.authUser = null;
+        startAlchemerConversation();
         addHistory("AUTH ERROR", error.message || String(error));
         showToast("Auth0 initialization failed", error.message || "Check the browser console.");
         console.error(error);
