@@ -629,28 +629,49 @@
       const email = user && user.email ? user.email.trim().toLowerCase() : "";
       const identityChanged = Boolean(email && (!state.personIdentified || email !== state.conversationIdentity));
 
-      if (identityChanged) {
-        identifyAlchemerUser(user);
+      if (state.conversationRequested) {
+        if (identityChanged) {
+          identifyAlchemerUser(user);
+          state.conversationIdentity = email;
+          addHistory("IDENTITY", "Updated the existing conversation with the signed-in Auth0 user.");
+        }
+        return;
       }
-
-      if (state.conversationRequested && !identityChanged) return;
 
       state.conversationStarting = true;
       setStatus("conversationStatus", "initializing", "tone-neutral");
 
       try {
-        sdk.createConversation();
+        if (email) {
+          const name = (user.name || user.nickname || "").trim();
+          const person = {
+            unique_token: email,
+            email: email,
+            custom_data: {
+              customer_id: email,
+              email: email
+            }
+          };
+
+          if (name) {
+            person.name = name;
+            person.custom_data.name = name;
+          }
+
+          sdk.createConversation({ person: person });
+          state.personIdentified = true;
+          addHistory("ALCHEMER IDENTITY", "Passed the Auth0 email, name, and custom data into createConversation().");
+        } else {
+          sdk.createConversation();
+        }
+
         state.conversationRequested = true;
         state.conversationStarting = false;
         state.conversationIdentity = email || "anonymous";
         setStatus("conversationStatus", "initialized", "tone-good");
-        $("sdkDetail").textContent = "SDK loaded; conversation initialized";
+        $("sdkDetail").textContent = "SDK loaded; conversation request sent";
         enableSdkControls();
         addHistory("CONVERSATION", email ? "Conversation requested for the signed-in Auth0 user." : "Anonymous conversation requested.");
-
-        if (identityChanged) {
-          addHistory("CONVERSATION", "A conversation request was made after identifying the signed-in user.");
-        }
 
         if (typeof sdk.doctor === "function") {
           addHistory("DIAGNOSTICS", "Running ApptentiveSDK.doctor(); inspect the browser console for conversation details.");
