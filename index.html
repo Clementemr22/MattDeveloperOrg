@@ -443,7 +443,7 @@
       </article>
       <article class="status-card">
         <div class="status-top"><span class="status-label">Conversation</span><span class="status-icon">◉</span></div>
-        <div class="status-value"><span id="conversationStatus" class="status-text tone-neutral">not initialized</span></div>
+        <div class="status-value"><span id="conversationStatus" class="status-text tone-neutral">Not Initialized</span></div>
         <div class="status-detail">Conversation initialization status</div>
       </article>
       <article class="status-card">
@@ -640,7 +640,7 @@
       }
 
       state.conversationStarting = true;
-      setStatus("conversationStatus", "initializing", "tone-neutral");
+      setStatus("conversationStatus", "Initializing", "tone-neutral");
 
       try {
         if (email) {
@@ -669,7 +669,7 @@
         state.conversationRequested = true;
         state.conversationStarting = false;
         state.conversationIdentity = email || "anonymous";
-        setStatus("conversationStatus", "initialized", "tone-good");
+        setStatus("conversationStatus", "Initialized", "tone-good");
         $("sdkDetail").textContent = "SDK loaded; conversation request sent";
         enableSdkControls();
         addHistory("CONVERSATION", email ? "Conversation requested for the signed-in Auth0 user." : "Anonymous conversation requested.");
@@ -683,7 +683,7 @@
       } catch (error) {
         state.conversationStarting = false;
         state.conversationRequested = false;
-        setStatus("conversationStatus", "not initialized", "tone-bad");
+        setStatus("conversationStatus", "Not Initialized", "tone-bad");
         addHistory("ERROR", "Conversation initialization failed: " + ((error && error.message) || error || "Unknown SDK error"));
         showToast("Conversation initialization failed", (error && error.message) || "The SDK could not initialize a conversation.");
         console.error(error);
