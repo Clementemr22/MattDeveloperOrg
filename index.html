@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#74869a">
-  <link rel="icon" href="./logo.ico" type="image/x-icon">
-  <title>Matt's Web App</title>
+  <title>SDK Testing — Matt's Web App</title>
   <style>
     :root {
       color-scheme: light;
@@ -345,10 +344,10 @@
     .history-panel { margin-top: 18px; }
     .toast { left: 18px; bottom: 18px; box-shadow: 0 8px 24px rgba(20, 28, 48, 0.12); }
     @media (max-width: 760px) {
-      .header-inner { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; }
-      .brand { width: auto; flex: 0 1 auto; flex-wrap: wrap; gap: 8px 14px; }
-      .header-actions { width: auto; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
-      .anonymous-pill { min-width: 0; max-width: 100%; white-space: nowrap; }
+      .header-inner { align-items: flex-start; flex-direction: column; gap: 10px; padding: 14px 0; }
+      .brand { width: 100%; flex-wrap: wrap; gap: 8px 16px; }
+      .header-actions { width: 100%; flex-wrap: wrap; gap: 7px; }
+      .anonymous-pill { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
       .header-actions .button { flex: 0 0 auto; }
     }
     @media (max-width: 560px) {
@@ -356,54 +355,35 @@
       .panel { padding: 16px; }
       .status-card { padding: 12px; }
       .header-inner, .page { width: calc(100% - 24px); }
-      .header-inner { align-items: center; }
-      .brand { gap: 6px 10px; }
-      .brand-name.top-link, .brand .top-link { font-size: 0.82rem; }
-      .header-actions { align-items: center; gap: 6px; }
-      .anonymous-pill { flex: 0 1 auto; padding: 2px 0; font-size: 0.76rem; }
-      .header-actions .button { flex: 0 0 auto; min-width: 0; padding: 8px 10px; font-size: 0.76rem; }
-      .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (max-width: 390px) {
-      .header-inner { flex-wrap: wrap; }
-      .brand { width: 100%; }
-      .header-actions { width: 100%; justify-content: flex-start; }
-      .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .brand { gap: 6px 12px; }
+      .brand-name.top-link, .brand .top-link { font-size: 0.84rem; }
+      .header-actions { align-items: center; }
+      .anonymous-pill { flex: 1 1 100%; padding: 2px 0; font-size: 0.8rem; }
+      .header-actions .button { flex: 1 1 auto; min-width: 0; }
+      .status-grid { grid-template-columns: minmax(0, 1fr); }
     }
   </style>
 
   <script>
     (function initApptentiveSDK() {
-      var sdk = window.ApptentiveSDK = window.ApptentiveSDK || [];
-
-      if (!sdk.version) {
-        sdk.methods = [
-          "buildDevice",
-          "createConversation",
-          "createMessage",
-          "engage",
-          "getSegments",
-          "identifyPerson",
-          "setOption",
-          "setPageName",
-          "showInteraction",
-          "showMessageCenter",
-          "updatePerson",
-          "canShowInteraction",
-          "doctor"
-        ];
-
-        sdk.factory = function (methodName) {
-          return function () {
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift(methodName);
-            sdk.push(args);
-            return sdk;
+      var ApptentiveSDK = window.ApptentiveSDK = window.ApptentiveSDK || [];
+      if (!ApptentiveSDK.version) {
+        if (!ApptentiveSDK.loaded) {
+          ApptentiveSDK.loaded = true;
+          ApptentiveSDK.methods = ["buildDevice", "createConversation", "createMessage", "engage", "getSegments", "identifyPerson", "setOption", "setPageName", "showInteraction", "showMessageCenter", "updatePerson"];
+          ApptentiveSDK.factory = function factory(t) {
+            return function f() {
+              var args = Array.prototype.slice.call(arguments);
+              args.unshift(t);
+              ApptentiveSDK.push(args);
+              return ApptentiveSDK;
+            };
           };
-        };
-
-        for (var i = 0; i < sdk.methods.length; i++) {
-          sdk[sdk.methods[i]] = sdk.factory(sdk.methods[i]);
+          for (var i = 0; i < ApptentiveSDK.methods.length; i++) {
+            var method = ApptentiveSDK.methods[i];
+            ApptentiveSDK[method] = ApptentiveSDK.factory(method);
+          }
+          ApptentiveSDK.LOADER_VERSION = "1.0.0";
         }
       }
     })();
@@ -431,7 +411,7 @@
   <main class="page">
     <section class="hero">
       <div>
-        <h1>Web SDK Testing</h1>
+        <h1>SDK Testing</h1>
       </div>
     </section>
 
@@ -533,8 +513,7 @@
       authUser: null,
       authReady: false,
       personIdentified: false,
-      conversationStarting: false,
-      conversationIdentity: ""
+      conversationStarting: false
     };
 
     const $ = (id) => document.getElementById(id);
@@ -623,56 +602,27 @@
     }
 
     function startAlchemerConversation() {
-      if (!state.sdkReady || !state.authReady || state.conversationStarting) return;
+      if (!state.sdkReady || !state.authReady || state.conversationStarting || state.conversationRequested) return;
 
       const sdk = window.ApptentiveSDK;
       const user = state.authUser;
-      const email = user && user.email ? user.email.trim().toLowerCase() : "";
-      const identityChanged = Boolean(email && (!state.personIdentified || email !== state.conversationIdentity));
-
-      if (state.conversationRequested) {
-        if (identityChanged) {
-          identifyAlchemerUser(user);
-          state.conversationIdentity = email;
-          addHistory("IDENTITY", "Updated the existing conversation with the signed-in Auth0 user.");
-        }
-        return;
-      }
-
       state.conversationStarting = true;
       setStatus("conversationStatus", "Initializing", "tone-neutral");
 
-      try {
-        if (email) {
-          const name = (user.name || user.nickname || "").trim();
-          const person = {
-            unique_token: email,
-            email: email,
-            custom_data: {
-              customer_id: email,
-              email: email
-            }
-          };
-
-          if (name) {
-            person.name = name;
-            person.custom_data.name = name;
-          }
-
-          sdk.createConversation({ person: person });
-          state.personIdentified = true;
-          addHistory("ALCHEMER IDENTITY", "Passed the Auth0 email, name, and custom data into createConversation().");
-        } else {
-          sdk.createConversation();
-        }
-
-        state.conversationRequested = true;
+      const finish = (data) => {
         state.conversationStarting = false;
-        state.conversationIdentity = email || "anonymous";
+        state.conversationRequested = true;
         setStatus("conversationStatus", "Initialized", "tone-good");
-        $("sdkDetail").textContent = "SDK loaded; conversation request sent";
+        $("sdkDetail").textContent = "SDK loaded; conversation initialized";
         enableSdkControls();
-        addHistory("CONVERSATION", email ? "Conversation requested for the signed-in Auth0 user." : "Anonymous conversation requested.");
+        addHistory("CONVERSATION", user ? "Conversation initialized for the signed-in Auth0 user." : "Anonymous conversation initialized.");
+
+        if (user) identifyAlchemerUser(user);
+
+        if (data && typeof data === "object") {
+          const conversationId = data.conversation_id || data.conversationId || data.id;
+          if (conversationId) addHistory("CONVERSATION", "Alchemer conversation ID: " + String(conversationId));
+        }
 
         if (typeof sdk.doctor === "function") {
           addHistory("DIAGNOSTICS", "Running ApptentiveSDK.doctor(); inspect the browser console for conversation details.");
@@ -680,20 +630,25 @@
         } else {
           addHistory("DIAGNOSTICS", "For conversation details, run ApptentiveSDK.doctor() in the browser console.");
         }
-      } catch (error) {
+      };
+
+      const fail = (error) => {
         state.conversationStarting = false;
         state.conversationRequested = false;
         setStatus("conversationStatus", "Not Initialized", "tone-bad");
         addHistory("ERROR", "Conversation initialization failed: " + ((error && error.message) || error || "Unknown SDK error"));
         showToast("Conversation initialization failed", (error && error.message) || "The SDK could not initialize a conversation.");
         console.error(error);
+      };
+
+      try {
+        sdk.createConversation({ success: finish, failure: fail });
+      } catch (error) {
+        fail(error);
       }
     }
 
     function updateAuthUI(user) {
-      const previousEmail = state.authUser && state.authUser.email ? state.authUser.email.trim().toLowerCase() : "";
-      const nextEmail = user && user.email ? user.email.trim().toLowerCase() : "";
-      if (previousEmail !== nextEmail) state.personIdentified = false;
       state.authUser = user || null;
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
@@ -710,7 +665,7 @@
     }
 
     function identifyAlchemerUser(user) {
-      if (!user || !user.email) return false;
+      if (!user || !user.email || state.personIdentified) return;
 
       const email = user.email.trim().toLowerCase();
       const name = (user.name || user.nickname || "").trim();
@@ -731,12 +686,11 @@
       try {
         window.ApptentiveSDK.identifyPerson(person);
         state.personIdentified = true;
-        addHistory("ALCHEMER IDENTITY", "Identified the Alchemer person using the Auth0 email and sent email/name custom data.");
-        return true;
+        addHistory("ALCHEMER IDENTITY", "Identified the Alchemer person by email and sent email/name custom data.");
+        showToast("Alchemer identity updated", "The signed-in user's email and name were sent to Alchemer.");
       } catch (error) {
         addHistory("ERROR", "Could not identify the Auth0 user in Alchemer: " + (error.message || error));
         console.error(error);
-        return false;
       }
     }
 
@@ -886,6 +840,20 @@
         const detail = event.detail;
         const message = detail && detail.message ? detail.message : "Apptentive reported an SDK error";
         addHistory("SDK ERROR", message);
+      });
+
+      document.addEventListener("apptentive:survey:error", event => {
+        const detail = event.detail;
+        const message = detail ? (detail.message || detail.error || JSON.stringify(detail)) : "No error details were provided.";
+        console.error("Survey error:", detail);
+        addHistory("SURVEY ERROR", String(message));
+        showToast("Survey error", String(message));
+      });
+
+      document.addEventListener("apptentive:survey:submit", event => {
+        console.log("Survey submitted:", event.detail);
+        addHistory("SURVEY SUBMITTED", "The survey submitted event was received.");
+        showToast("Survey submitted", "The SDK reported a survey submission event.");
       });
 
       document.addEventListener("apptentive:render:interaction", () => {
