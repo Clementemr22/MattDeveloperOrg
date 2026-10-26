@@ -513,7 +513,8 @@
       authUser: null,
       authReady: false,
       personIdentified: false,
-      conversationStarting: false
+      conversationStarting: false,
+      authFailed: false
     };
 
     const $ = (id) => document.getElementById(id);
@@ -602,10 +603,10 @@
     }
 
     function startAlchemerConversation() {
-      if (!state.sdkReady || !state.authReady || state.conversationStarting || state.conversationRequested) return;
+      if (!state.sdkReady || state.conversationStarting || state.conversationRequested) return;
 
       const sdk = window.ApptentiveSDK;
-      const user = state.authUser;
+      const user = state.authReady ? state.authUser : null;
       state.conversationStarting = true;
       setStatus("conversationStatus", "Initializing", "tone-neutral");
 
@@ -657,6 +658,7 @@
           if (email) options.person.email = email;
           if (name) options.person.name = name;
         }
+        addHistory("CONVERSATION", user ? "Requesting authenticated conversation." : "Requesting anonymous conversation.");
         sdk.createConversation(options);
       } catch (error) {
         fail(error);
@@ -665,6 +667,11 @@
 
     function updateAuthUI(user) {
       state.authUser = user || null;
+      if (state.conversationRequested && user) {
+        // Auth0 can finish after the anonymous conversation starts.
+        // identifyPerson is the documented Web SDK path for late identity.
+        identifyAlchemerUser(user);
+      }
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
       updateAuthProfile(user);
@@ -680,15 +687,15 @@
     }
 
     function identifyAlchemerUser(user) {
-      if (!user || !user.email || state.personIdentified) return;
+      if (!user || !user.sub || state.personIdentified) return;
 
       const email = user.email.trim().toLowerCase();
       const name = (user.name || user.nickname || "").trim();
       const person = {
-        unique_token: email,
+        unique_token: user.sub,
         email: email,
         custom_data: {
-          customer_id: email,
+          customer_id: email || user.sub,
           email: email
         }
       };
