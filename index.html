@@ -365,6 +365,23 @@
   </style>
 
   <script>
+    // Testing mode: discard only recognizable Apptentive localStorage entries
+    // before loading the SDK. Never clear Auth0 or unrelated site storage.
+    (function resetApptentiveTestStorage() {
+      try {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && /^apptentive/i.test(key)) keys.push(key);
+        }
+        keys.forEach(key => localStorage.removeItem(key));
+        window.__apptentiveResetCount = keys.length;
+      } catch (error) {
+        window.__apptentiveResetError = String(error);
+      }
+    })();
+  </script>
+  <script>
     (function initApptentiveSDK() {
       var ApptentiveSDK = window.ApptentiveSDK = window.ApptentiveSDK || [];
       if (!ApptentiveSDK.version) {
@@ -606,7 +623,8 @@
       if (!state.sdkReady || state.conversationStarting || state.conversationRequested) return;
 
       const sdk = window.ApptentiveSDK;
-      const user = state.authReady ? state.authUser : null;
+      // Testing mode deliberately starts anonymously even when Auth0 is signed in.
+      const user = null;
       state.conversationStarting = true;
       setStatus("conversationStatus", "Initializing", "tone-neutral");
 
@@ -667,11 +685,6 @@
 
     function updateAuthUI(user) {
       state.authUser = user || null;
-      if (state.conversationRequested && user) {
-        // Auth0 can finish after the anonymous conversation starts.
-        // identifyPerson is the documented Web SDK path for late identity.
-        identifyAlchemerUser(user);
-      }
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
       updateAuthProfile(user);
@@ -896,7 +909,8 @@
         });
       });
 
-      addHistory("SYSTEM", "Page loaded; waiting for the Alchemer Web SDK script.");
+      addHistory("SYSTEM", "Page loaded; fresh anonymous conversation testing mode.");
+      addHistory("STORAGE", "Removed " + (window.__apptentiveResetCount || 0) + " Apptentive-prefixed localStorage entries before SDK load." + (window.__apptentiveResetError ? " Reset error: " + window.__apptentiveResetError : ""));
       if (window.__apptentiveScriptLoaded) {
         setSdkLoaded();
       } else if (window.__apptentiveScriptFailed) {
