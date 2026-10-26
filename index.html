@@ -642,7 +642,22 @@
       };
 
       try {
-        sdk.createConversation({ success: finish, failure: fail });
+        const options = { success: finish, failure: fail };
+        if (user && user.sub) {
+          const email = (user.email || "").trim().toLowerCase();
+          const name = (user.name || user.nickname || "").trim();
+          options.person = {
+            unique_token: user.sub,
+            custom_data: {
+              auth_provider: "auth0",
+              customer_id: email || user.sub,
+              authenticated: true
+            }
+          };
+          if (email) options.person.email = email;
+          if (name) options.person.name = name;
+        }
+        sdk.createConversation(options);
       } catch (error) {
         fail(error);
       }
