@@ -365,21 +365,17 @@
   </style>
 
   <script>
-    // Keep Web SDK state across refreshes, as required for conversation restoration.
-    // An explicit logout clears Apptentive state before returning anonymously.
-    (function prepareApptentiveStorage() {
-      window.__apptentiveResetCount = 0;
+    // Testing mode: discard only recognizable Apptentive localStorage entries
+    // before loading the SDK. Never clear Auth0 or unrelated site storage.
+    (function resetApptentiveTestStorage() {
       try {
-        if (sessionStorage.getItem("alchemer-reset-on-logout") === "1") {
-          sessionStorage.removeItem("alchemer-reset-on-logout");
-          const keys = [];
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && /^apptentive/i.test(key)) keys.push(key);
-          }
-          keys.forEach(key => localStorage.removeItem(key));
-          window.__apptentiveResetCount = keys.length;
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && /^apptentive/i.test(key)) keys.push(key);
         }
+        keys.forEach(key => localStorage.removeItem(key));
+        window.__apptentiveResetCount = keys.length;
       } catch (error) {
         window.__apptentiveResetError = String(error);
       }
@@ -534,7 +530,6 @@
       authUser: null,
       authReady: false,
       personIdentified: false,
-      identifyingPerson: false,
       conversationStarting: false,
       authFailed: false
     };
@@ -641,10 +636,7 @@
         enableSdkControls();
         addHistory("CONVERSATION", user ? "Conversation initialized for the signed-in Auth0 user." : "Anonymous conversation initialized.");
 
-        if (user) {
-          addHistory("CUSTOM DATA", "Auth0 identity supplied during conversation creation; verifying identity on the active conversation.");
-          identifyAlchemerUser(user);
-        }
+        if (user) addHistory("CUSTOM DATA", "Auth0 identity and person custom data supplied during conversation creation.");
 
         if (data && typeof data === "object") {
           const conversationId = data.conversation_id || data.conversationId || data.id;
@@ -674,7 +666,6 @@
           const email = (user.email || "").trim().toLowerCase();
           const name = (user.name || user.nickname || "").trim();
           options.person = {
-            unique_token: user.sub,
             custom_data: {
               auth_provider: "auth0",
               customer_id: email || user.sub,
@@ -708,39 +699,33 @@
       startAlchemerConversation();
     }
 
-    async function identifyAlchemerUser(user) {
-      if (!user || !user.sub || state.personIdentified || !state.conversationRequested) return;
-      if (state.identifyingPerson) return;
+    function identifyAlchemerUser(user) {
+      if (!user || state.personIdentified) return;
 
       const email = (user.email || "").trim().toLowerCase();
       const name = (user.name || user.nickname || "").trim();
       const person = {
-        unique_token: user.sub,
         custom_data: {
           customer_id: email || user.sub,
           auth_provider: "auth0",
           authenticated: true
         }
       };
-      if (email) person.email = email;
-      if (name) person.name = name;
 
-      state.identifyingPerson = true;
+      if (email) person.email = email;
+      if (name) {
+        person.name = name;
+        person.custom_data.name = name;
+      }
+
       try {
-        const result = await window.ApptentiveSDK.identifyPerson(person);
-        if (result instanceof Error) throw result;
-        if (state.authUser?.sub !== user.sub) {
-          addHistory("WARNING", "Auth0 identity changed during Alchemer identification.");
-          return;
-        }
+        window.ApptentiveSDK.identifyPerson(person);
         state.personIdentified = true;
-        addHistory("ALCHEMER IDENTITY", "Applied authenticated person details to the active conversation.");
-        if (typeof window.ApptentiveSDK.doctor === "function") window.ApptentiveSDK.doctor();
+        addHistory("ALCHEMER IDENTITY", "Identified the Alchemer person by email and sent email/name custom data.");
+        showToast("Alchemer identity updated", "The signed-in user's email and name were sent to Alchemer.");
       } catch (error) {
-        addHistory("ERROR", "Alchemer identification failed: " + (error.message || error));
-        console.error("Alchemer identification failed", error);
-      } finally {
-        state.identifyingPerson = false;
+        addHistory("ERROR", "Could not identify the Auth0 user in Alchemer: " + (error.message || error));
+        console.error(error);
       }
     }
 
@@ -800,8 +785,6 @@
       if (!state.auth0Client) return;
       state.personIdentified = false;
       state.authUser = null;
-      // Reset only when the logged-in session ends; retain state on refresh.
-      sessionStorage.setItem("alchemer-reset-on-logout", "1");
       state.auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
     }
 
@@ -926,8 +909,8 @@
         });
       });
 
-      addHistory("SYSTEM", "Page loaded; retaining Apptentive conversation state across refreshes.");
-      addHistory("STORAGE", "Removed " + (window.__apptentiveResetCount || 0) + " Apptentive-prefixed localStorage entries after sign-out." + (window.__apptentiveResetError ? " Reset error: " + window.__apptentiveResetError : ""));
+      addHistory("SYSTEM", "Page loaded; fresh conversation testing mode (Auth0-aware).");
+      addHistory("STORAGE", "Removed " + (window.__apptentiveResetCount || 0) + " Apptentive-prefixed localStorage entries before SDK load." + (window.__apptentiveResetError ? " Reset error: " + window.__apptentiveResetError : ""));
       if (window.__apptentiveScriptLoaded) {
         setSdkLoaded();
       } else if (window.__apptentiveScriptFailed) {
