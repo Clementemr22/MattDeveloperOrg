@@ -668,7 +668,8 @@
           options.person = {
             custom_data: {
               auth_provider: "auth0",
-              customer_id: email || user.sub,
+              customer_id: user.sub,
+              auth0_user_id: user.sub,
               authenticated: true
             }
           };
@@ -706,7 +707,8 @@
       const name = (user.name || user.nickname || "").trim();
       const person = {
         custom_data: {
-          customer_id: email || user.sub,
+          customer_id: user.sub,
+              auth0_user_id: user.sub,
           auth_provider: "auth0",
           authenticated: true
         }
