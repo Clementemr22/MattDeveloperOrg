@@ -617,7 +617,7 @@
         enableSdkControls();
         addHistory("CONVERSATION", user ? "Conversation initialized for the signed-in Auth0 user." : "Anonymous conversation initialized.");
 
-        if (user) identifyAlchemerUser(user);
+        if (user) addHistory("CUSTOM DATA", "Auth0 identity and custom data supplied during conversation creation.");
 
         if (data && typeof data === "object") {
           const conversationId = data.conversation_id || data.conversationId || data.id;
