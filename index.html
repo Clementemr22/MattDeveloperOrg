@@ -534,6 +534,7 @@
       authUser: null,
       authReady: false,
       personIdentified: false,
+      identifyingPerson: false,
       conversationStarting: false,
       authFailed: false
     };
@@ -640,7 +641,10 @@
         enableSdkControls();
         addHistory("CONVERSATION", user ? "Conversation initialized for the signed-in Auth0 user." : "Anonymous conversation initialized.");
 
-        if (user) addHistory("CUSTOM DATA", "Auth0 identity and person custom data supplied during conversation creation.");
+        if (user) {
+          addHistory("CUSTOM DATA", "Auth0 identity supplied during conversation creation; verifying identity on the active conversation.");
+          identifyAlchemerUser(user);
+        }
 
         if (data && typeof data === "object") {
           const conversationId = data.conversation_id || data.conversationId || data.id;
@@ -704,8 +708,9 @@
       startAlchemerConversation();
     }
 
-    function identifyAlchemerUser(user) {
-      if (!user || !user.sub || state.personIdentified) return;
+    async function identifyAlchemerUser(user) {
+      if (!user || !user.sub || state.personIdentified || !state.conversationRequested) return;
+      if (state.identifyingPerson) return;
 
       const email = (user.email || "").trim().toLowerCase();
       const name = (user.name || user.nickname || "").trim();
@@ -717,21 +722,25 @@
           authenticated: true
         }
       };
-
       if (email) person.email = email;
-      if (name) {
-        person.name = name;
-        person.custom_data.name = name;
-      }
+      if (name) person.name = name;
 
+      state.identifyingPerson = true;
       try {
-        window.ApptentiveSDK.identifyPerson(person);
+        const result = await window.ApptentiveSDK.identifyPerson(person);
+        if (result instanceof Error) throw result;
+        if (state.authUser?.sub !== user.sub) {
+          addHistory("WARNING", "Auth0 identity changed during Alchemer identification.");
+          return;
+        }
         state.personIdentified = true;
-        addHistory("ALCHEMER IDENTITY", "Identified the Alchemer person by email and sent email/name custom data.");
-        showToast("Alchemer identity updated", "The signed-in user's email and name were sent to Alchemer.");
+        addHistory("ALCHEMER IDENTITY", "Applied authenticated person details to the active conversation.");
+        if (typeof window.ApptentiveSDK.doctor === "function") window.ApptentiveSDK.doctor();
       } catch (error) {
-        addHistory("ERROR", "Could not identify the Auth0 user in Alchemer: " + (error.message || error));
-        console.error(error);
+        addHistory("ERROR", "Alchemer identification failed: " + (error.message || error));
+        console.error("Alchemer identification failed", error);
+      } finally {
+        state.identifyingPerson = false;
       }
     }
 
