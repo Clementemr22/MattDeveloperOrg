@@ -620,11 +620,11 @@
     }
 
     function startAlchemerConversation() {
-      if (!state.sdkReady || state.conversationStarting || state.conversationRequested) return;
+      if (!state.sdkReady || !state.authReady || state.conversationStarting || state.conversationRequested) return;
 
       const sdk = window.ApptentiveSDK;
-      // Testing mode deliberately starts anonymously even when Auth0 is signed in.
-      const user = null;
+      // Wait for Auth0 to resolve so a fresh conversation has the right identity.
+      const user = state.authUser;
       state.conversationStarting = true;
       setStatus("conversationStatus", "Initializing", "tone-neutral");
 
@@ -636,7 +636,7 @@
         enableSdkControls();
         addHistory("CONVERSATION", user ? "Conversation initialized for the signed-in Auth0 user." : "Anonymous conversation initialized.");
 
-        if (user) addHistory("CUSTOM DATA", "Auth0 identity and custom data supplied during conversation creation.");
+        if (user) addHistory("CUSTOM DATA", "Auth0 identity and person custom data supplied during conversation creation.");
 
         if (data && typeof data === "object") {
           const conversationId = data.conversation_id || data.conversationId || data.id;
@@ -696,23 +696,25 @@
       } else {
         addHistory("AUTH", "No authenticated Auth0 user.");
       }
+      if (state.authReady && user && state.conversationRequested && !state.personIdentified) identifyAlchemerUser(user);
       startAlchemerConversation();
     }
 
     function identifyAlchemerUser(user) {
       if (!user || !user.sub || state.personIdentified) return;
 
-      const email = user.email.trim().toLowerCase();
+      const email = (user.email || "").trim().toLowerCase();
       const name = (user.name || user.nickname || "").trim();
       const person = {
         unique_token: user.sub,
-        email: email,
         custom_data: {
           customer_id: email || user.sub,
-          email: email
+          auth_provider: "auth0",
+          authenticated: true
         }
       };
 
+      if (email) person.email = email;
       if (name) {
         person.name = name;
         person.custom_data.name = name;
@@ -752,8 +754,8 @@
         }
 
         const isAuthenticated = await state.auth0Client.isAuthenticated();
-        updateAuthUI(isAuthenticated ? await state.auth0Client.getUser() : null);
         state.authReady = true;
+        updateAuthUI(isAuthenticated ? await state.auth0Client.getUser() : null);
         startAlchemerConversation();
         addHistory("AUTH", "Auth0 SDK initialized.");
       } catch (error) {
@@ -909,7 +911,7 @@
         });
       });
 
-      addHistory("SYSTEM", "Page loaded; fresh anonymous conversation testing mode.");
+      addHistory("SYSTEM", "Page loaded; fresh conversation testing mode (Auth0-aware).");
       addHistory("STORAGE", "Removed " + (window.__apptentiveResetCount || 0) + " Apptentive-prefixed localStorage entries before SDK load." + (window.__apptentiveResetError ? " Reset error: " + window.__apptentiveResetError : ""));
       if (window.__apptentiveScriptLoaded) {
         setSdkLoaded();
