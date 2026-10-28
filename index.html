@@ -525,13 +525,24 @@
     <section class="panel">
       <div class="panel-heading">
         <div>
-          <h2>Supabase connection test</h2>
-          <p>Check single-use prompt eligibility using your signed-in Auth0 account. This does not claim the prompt.</p>
+          <h2>Supabase interaction testing</h2>
+          <p>Test account-wide eligibility for the single-use prompt, independently of Alchemer's conversation ID.</p>
         </div>
         <span class="section-kicker">04 / Backend</span>
       </div>
-      <button class="button button-secondary button-small" type="button" id="testSupabaseButton" disabled>Test Supabase Connection</button>
-      <p class="helper" id="supabaseTestResult" role="status">Sign in with Auth0 to run the test.</p>
+      <div class="event-buttons">
+        <button class="event-button" type="button" id="testSupabaseButton" disabled>
+          <span class="event-symbol">✓</span><span><span class="event-title">Check eligibility</span><span class="event-description">Read current single-use-prompt status</span></span>
+        </button>
+        <button class="event-button" type="button" id="claimInteractionButton" disabled>
+          <span class="event-symbol">＋</span><span><span class="event-title">Claim interaction</span><span class="event-description">Reserve single-use-prompt for this account</span></span>
+        </button>
+        <button class="event-button" type="button" id="resetInteractionsButton" disabled>
+          <span class="event-symbol">↺</span><span><span class="event-title">Reset interactions</span><span class="event-description">Delete all interaction history for this account</span></span>
+        </button>
+      </div>
+      <p class="helper" id="supabaseTestResult" role="status">Sign in with Auth0 to test interaction history.</p>
+      <p class="helper">Reset affects Supabase records for your account only; it does not reset Alchemer's built-in frequency limits.</p>
     </section>
 
     <section class="panel history-panel">
@@ -562,7 +573,8 @@
       authReady: false,
       personIdentified: false,
       conversationStarting: false,
-      authFailed: false
+      authFailed: false,
+      interactionTestBusy: false
     };
 
     const $ = (id) => document.getElementById(id);
@@ -719,7 +731,7 @@
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
       updateAuthProfile(user);
-      $("testSupabaseButton").disabled = !user;
+      ["testSupabaseButton", "claimInteractionButton", "resetInteractionsButton"].forEach(id => $(id).disabled = !user || state.interactionTestBusy);
       $("loginButton").hidden = Boolean(user);
       $("signupButton").hidden = Boolean(user);
       $("logoutButton").hidden = !user;
@@ -763,42 +775,44 @@
       }
     }
 
-    async function testSupabaseConnection() {
-      const button = $("testSupabaseButton");
+    async function runInteractionTest(action) {
       const result = $("supabaseTestResult");
       if (!state.authReady || !state.authUser || !state.auth0Client) {
         result.textContent = "Sign in with Auth0 before testing.";
-        addHistory("SUPABASE", "Test skipped: Auth0 sign-in required.");
         return;
       }
-      button.disabled = true;
-      result.textContent = "Checking Supabase eligibility...";
-      addHistory("SUPABASE", "Checking single-use-prompt eligibility (read-only).");
+      if (state.interactionTestBusy) return;
+      if (action === "reset" && !window.confirm("Delete ALL Supabase interaction history for your signed-in Auth0 account? This cannot be undone.")) return;
+      state.interactionTestBusy = true;
+      const buttons = ["testSupabaseButton", "claimInteractionButton", "resetInteractionsButton"];
+      buttons.forEach(id => $(id).disabled = true);
+      result.textContent = action === "reset" ? "Resetting interaction history..." : action === "claim" ? "Claiming single-use-prompt..." : "Checking eligibility...";
       try {
+        const userId = state.authUser.sub;
         const token = await state.auth0Client.getTokenSilently({
           authorizationParams: { audience: "https://alchemer-interaction-api" }
         });
+        if (state.authUser?.sub !== userId) throw new Error("Signed-in account changed during the request.");
         const response = await fetch("https://tvclkybldunxpmzlfrne.supabase.co/functions/v1/Interaction-Tracking", {
           method: "POST",
-          headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ action: "check", interaction_id: "single-use-prompt" })
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ action, interaction_id: "single-use-prompt" })
         });
-        const body = await response.text();
+        const raw = await response.text();
         let data;
-        try { data = JSON.parse(body); } catch { data = { message: body.slice(0, 250) }; }
+        try { data = JSON.parse(raw); } catch { data = { message: raw.slice(0, 250) }; }
+        if (state.authUser?.sub !== userId) throw new Error("Signed-in account changed during the request.");
         const detail = JSON.stringify(data);
-        result.textContent = "HTTP " + response.status + ": " + detail;
-        addHistory("SUPABASE", "HTTP " + response.status + ": " + detail);
+        result.textContent = action.toUpperCase() + " — HTTP " + response.status + ": " + detail;
+        addHistory(response.ok ? "SUPABASE" : "SUPABASE ERROR", action + " — HTTP " + response.status + ": " + detail);
       } catch (error) {
-        const message = error && error.message ? error.message : String(error);
+        const message = error?.message || String(error);
         result.textContent = "Test failed: " + message;
-        addHistory("SUPABASE ERROR", message);
-        console.error("Supabase connection test failed:", error);
+        addHistory("SUPABASE ERROR", action + ": " + message);
+        console.error("Supabase interaction test failed:", error);
       } finally {
-        button.disabled = !state.authUser;
+        state.interactionTestBusy = false;
+        buttons.forEach(id => $(id).disabled = !state.authUser);
       }
     }
 
@@ -921,7 +935,9 @@
       });
 
       $("messageCenterButton").addEventListener("click", openMessageCenter);
-      $("testSupabaseButton").addEventListener("click", testSupabaseConnection);
+      $("testSupabaseButton").addEventListener("click", () => runInteractionTest("check"));
+      $("claimInteractionButton").addEventListener("click", () => runInteractionTest("claim"));
+      $("resetInteractionsButton").addEventListener("click", () => runInteractionTest("reset"));
 
       $("clearHistoryButton").addEventListener("click", () => {
         $("eventHistory").replaceChildren();
