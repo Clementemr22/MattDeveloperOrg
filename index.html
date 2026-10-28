@@ -800,11 +800,11 @@
         if (state.authUser?.sub !== userId || !state.conversationRequested) return;
         if (typeof data.eligible !== "boolean") throw new Error("Unexpected eligibility response.");
         state.seenPromptCheckedFor = userId;
-        if (data.eligible === false) {
-          window.ApptentiveSDK.engage("seen-single-use-prompt");
-          addHistory("SUPABASE", "Previously claimed single-use-prompt; silently sent seen-single-use-prompt.");
+        if (data.eligible === true) {
+          window.ApptentiveSDK.engage("single-use-prompt-enroll");
+          addHistory("SUPABASE", "Eligible for single-use-prompt; silently sent single-use-prompt-enroll.");
         } else {
-          addHistory("SUPABASE", "Eligible for single-use-prompt; no event sent.");
+          addHistory("SUPABASE", "Previously claimed single-use-prompt; no enrollment event sent.");
         }
       } catch (error) {
         addHistory("SUPABASE ERROR", "Automatic eligibility check failed: " + (error?.message || error));
