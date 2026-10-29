@@ -505,6 +505,9 @@
             <button class="event-button" type="button" id="testSupabaseButton" disabled>
               <span class="event-symbol">✓</span><span><span class="event-title">Test Auth0 / Supabase</span><span class="event-description">Verify authentication and backend access</span></span>
             </button>
+            <button class="event-button" type="button" id="listInteractionsButton" disabled>
+              <span class="event-symbol">≡</span><span><span class="event-title">View interaction eligibility</span><span class="event-description">List known interactions and account eligibility</span></span>
+            </button>
             <button class="event-button" type="button" id="resetInteractionsButton" disabled>
               <span class="event-symbol">↺</span><span><span class="event-title">Reset interactions</span><span class="event-description">Clear all Supabase interaction records for this account</span></span>
             </button>
@@ -743,7 +746,7 @@
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
       updateAuthProfile(user);
-      ["testSupabaseButton", "resetInteractionsButton"].forEach(id => $(id).disabled = !user || state.interactionTestBusy);
+      ["testSupabaseButton", "listInteractionsButton", "resetInteractionsButton"].forEach(id => $(id).disabled = !user || state.interactionTestBusy);
       $("loginButton").hidden = Boolean(user);
       $("signupButton").hidden = Boolean(user);
       $("logoutButton").hidden = !user;
@@ -832,10 +835,10 @@
       if (state.interactionTestBusy) return;
       if (action === "reset" && !window.confirm("Delete ALL Supabase interaction history for your signed-in Auth0 account? This cannot be undone.")) return;
       state.interactionTestBusy = true;
-      const buttons = ["testSupabaseButton", "resetInteractionsButton"];
+      const buttons = ["testSupabaseButton", "listInteractionsButton", "resetInteractionsButton"];
       buttons.forEach(id => $(id).disabled = true);
       result.dataset.tone = "";
-      result.textContent = action === "reset" ? "Resetting interaction history..." : "Testing Auth0 / Supabase connection...";
+      result.textContent = action === "reset" ? "Resetting interaction history..." : action === "list" ? "Loading interaction eligibility..." : "Testing Auth0 / Supabase connection...";
       try {
         const userId = state.authUser.sub;
         const token = await state.auth0Client.getTokenSilently({
@@ -845,7 +848,7 @@
         const response = await fetch("https://tvclkybldunxpmzlfrne.supabase.co/functions/v1/Interaction-Tracking", {
           method: "POST",
           headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-          body: JSON.stringify({ action: action === "reset" ? "reset" : "check", interaction_id: "single-use-prompt" })
+          body: JSON.stringify({ action: action === "reset" ? "reset" : action === "list" ? "list" : "check", interaction_id: "single-use-prompt" })
         });
         const raw = await response.text();
         let data;
@@ -855,16 +858,26 @@
         if (action === "reset") {
           if (data.reset !== true) throw new Error("Unexpected reset response.");
           result.textContent = "✓ Interactions reset successfully.\nAll Supabase interaction records for your account have been cleared. Refresh to re-enroll.";
+        } else if (action === "list") {
+          if (!Array.isArray(data.interactions)) throw new Error("Unexpected interaction list response.");
+          const rows = data.interactions;
+          const lines = rows.map(item => {
+            if (typeof item.interaction_id !== "string" || typeof item.eligible !== "boolean") throw new Error("Invalid interaction entry.");
+            return (item.eligible ? "✓ ELIGIBLE   " : "✕ INELIGIBLE ") + item.interaction_id +
+              (item.eligible ? "" : " (" + (item.status || "claimed") + ")");
+          });
+          result.textContent = "Interaction eligibility — " + rows.length + " known\n" +
+            (lines.length ? lines.join("\n") : "No known interactions returned.");
         } else {
           if (typeof data.eligible !== "boolean") throw new Error("Unexpected connection test response.");
           result.textContent = "✓ Auth0 / Supabase connected\nAPI authentication: successful\nSingle-use prompt: " + (data.eligible ? "Eligible" : "Already claimed");
         }
         result.dataset.tone = "success";
-        addHistory("SUPABASE", action === "reset" ? "All interactions reset." : "Auth0 / Supabase connection verified.");
+        addHistory("SUPABASE", action === "reset" ? "All interactions reset." : action === "list" ? "Interaction eligibility list loaded." : "Auth0 / Supabase connection verified.");
       } catch (error) {
         const message = error?.message || String(error);
         result.dataset.tone = "error";
-        result.textContent = "✕ " + (action === "reset" ? "Reset failed" : "Connection test failed") + "\n" + message;
+        result.textContent = "✕ " + (action === "reset" ? "Reset failed" : action === "list" ? "Eligibility list failed" : "Connection test failed") + "\n" + message;
         addHistory("SUPABASE ERROR", action + ": " + message);
         console.error("Supabase tool failed:", error);
       } finally {
@@ -1014,6 +1027,7 @@
 
       $("messageCenterButton").addEventListener("click", openMessageCenter);
       $("testSupabaseButton").addEventListener("click", () => runInteractionTest("check"));
+      $("listInteractionsButton").addEventListener("click", () => runInteractionTest("list"));
       $("resetInteractionsButton").addEventListener("click", () => runInteractionTest("reset"));
 
       $("clearHistoryButton").addEventListener("click", () => {
