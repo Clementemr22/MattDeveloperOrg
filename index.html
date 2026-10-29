@@ -691,21 +691,15 @@
         $("sdkDetail").textContent = "SDK loaded; conversation initialized";
         enableSdkControls();
         syncSeenSingleUsePrompt();
-        addHistory("CONVERSATION", user ? "Conversation initialized for the signed-in Auth0 user." : "Anonymous conversation initialized.");
+        addHistory("CONVERSATION", user ? "Fresh conversation initialized with Auth0 identity." : "Fresh anonymous conversation initialized.");
 
-        if (user) addHistory("CUSTOM DATA", "Auth0 identity and person custom data supplied during conversation creation.");
+        if (user) addHistory("CUSTOM DATA", "Auth0 user ID, email/name, and targeting data supplied to the new conversation.");
 
         if (data && typeof data === "object") {
           const conversationId = data.conversation_id || data.conversationId || data.id;
           if (conversationId) addHistory("CONVERSATION", "Alchemer conversation ID: " + String(conversationId));
         }
 
-        if (typeof sdk.doctor === "function") {
-          addHistory("DIAGNOSTICS", "Running ApptentiveSDK.doctor(); inspect the browser console for conversation details.");
-          sdk.doctor();
-        } else {
-          addHistory("DIAGNOSTICS", "For conversation details, run ApptentiveSDK.doctor() in the browser console.");
-        }
       };
 
       const fail = (error) => {
@@ -733,7 +727,7 @@
           if (email) options.person.email = email;
           if (name) options.person.name = name;
         }
-        addHistory("CONVERSATION", user ? "Requesting authenticated conversation." : "Requesting anonymous conversation.");
+        addHistory("CONVERSATION", user ? "Creating fresh conversation with Auth0 person data." : "Creating fresh anonymous conversation.");
         sdk.createConversation(options);
       } catch (error) {
         fail(error);
@@ -1128,7 +1122,7 @@
         });
       });
 
-      addHistory("SYSTEM", "Page loaded; fresh conversation testing mode (Auth0-aware).");
+      addHistory("SYSTEM", "Page loaded; creating a fresh Alchemer conversation and using Auth0 / Supabase for persistent targeting.");
       addHistory("STORAGE", "Removed " + (window.__apptentiveResetCount || 0) + " Apptentive-prefixed localStorage entries before SDK load." + (window.__apptentiveResetError ? " Reset error: " + window.__apptentiveResetError : ""));
       if (window.__apptentiveScriptLoaded) {
         setSdkLoaded();
