@@ -743,6 +743,13 @@
     function updateAuthUI(user) {
       if (state.authUser?.sub !== user?.sub) state.seenPromptCheckedFor = null;
       state.authUser = user || null;
+      if (!state.interactionTestBusy) {
+        const result = $("supabaseTestResult");
+        result.dataset.tone = "";
+        result.textContent = user
+          ? "Signed in. Choose a tool above to view results."
+          : "Sign in with Auth0 to use these tools.";
+      }
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
       updateAuthProfile(user);
