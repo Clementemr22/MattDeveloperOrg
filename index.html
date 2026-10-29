@@ -1063,13 +1063,11 @@
         const message = detail ? (detail.message || detail.error || JSON.stringify(detail)) : "No error details were provided.";
         console.error("Survey error:", detail);
         addHistory("SURVEY ERROR", String(message));
-        showToast("Survey error", String(message));
       });
 
       document.addEventListener("apptentive:survey:submit", event => {
         console.log("Survey submitted:", event.detail);
         addHistory("SURVEY SUBMITTED", "The survey submitted event was received.");
-        showToast("Survey submitted", "The SDK reported a survey submission event.");
       });
 
       document.addEventListener("apptentive:render:interaction", async event => {
