@@ -664,7 +664,7 @@
       state.sdkReady = true;
       setStatus("sdkStatus", "Loaded", "tone-good");
       $("sdkDetail").textContent = "SDK script loaded";
-      addHistory("SDK", "Alchemer Web SDK script loaded");
+      addHistory("SDK", "Alchemer SDK loader completed; createConversation API available.");
 
       try {
         sdk.setOption("debug", true);
@@ -690,16 +690,15 @@
         setStatus("conversationStatus", "Initialized", "tone-good");
         $("sdkDetail").textContent = "SDK loaded; conversation initialized";
         enableSdkControls();
-        syncSeenSingleUsePrompt();
-        addHistory("CONVERSATION", user ? "Fresh conversation initialized with Auth0 identity." : "Fresh anonymous conversation initialized.");
+        addHistory("CONVERSATION", user ? "createConversation success callback received for authenticated user." : "createConversation success callback received for anonymous session.");
 
-        if (user) addHistory("CUSTOM DATA", "Auth0 user ID, email/name, and targeting data supplied to the new conversation.");
+        if (user) addHistory("CUSTOM DATA", "Auth0 person fields were included in the createConversation request.");
 
         if (data && typeof data === "object") {
           const conversationId = data.conversation_id || data.conversationId || data.id;
-          if (conversationId) addHistory("CONVERSATION", "Alchemer conversation ID: " + String(conversationId));
+          if (conversationId) addHistory("CONVERSATION", "Alchemer returned conversation ID: " + String(conversationId));
         }
-
+        syncSeenSingleUsePrompt();
       };
 
       const fail = (error) => {
@@ -727,7 +726,7 @@
           if (email) options.person.email = email;
           if (name) options.person.name = name;
         }
-        addHistory("CONVERSATION", user ? "Creating fresh conversation with Auth0 person data." : "Creating fresh anonymous conversation.");
+        addHistory("CONVERSATION", user ? "Calling createConversation with Auth0 person fields." : "Calling createConversation without authenticated person fields.");
         sdk.createConversation(options);
       } catch (error) {
         fail(error);
@@ -752,9 +751,9 @@
       $("signupButton").hidden = Boolean(user);
       $("logoutButton").hidden = !user;
       if (user) {
-        addHistory("AUTH", "Authenticated as " + (user.email || user.name || user.sub));
+        addHistory("AUTH", "Auth0 SDK reports authenticated user: " + (user.email || user.name || user.sub));
       } else {
-        addHistory("AUTH", "No authenticated Auth0 user.");
+        addHistory("AUTH", "Auth0 SDK reports no authenticated user.");
       }
       if (state.authReady && user && state.conversationRequested && !state.personIdentified) identifyAlchemerUser(user);
       startAlchemerConversation();
@@ -784,7 +783,7 @@
       try {
         window.ApptentiveSDK.identifyPerson(person);
         state.personIdentified = true;
-        addHistory("ALCHEMER IDENTITY", "Identified the Alchemer person by email and sent email/name custom data.");
+        addHistory("ALCHEMER IDENTITY", "Called identifyPerson with Auth0 person fields; SDK acceptance not independently confirmed.");
         showToast("Alchemer identity updated", "The signed-in user's email and name were sent to Alchemer.");
       } catch (error) {
         addHistory("ERROR", "Could not identify the Auth0 user in Alchemer: " + (error.message || error));
@@ -814,12 +813,12 @@
         state.seenPromptCheckedFor = userId;
         if (data.eligible === true) {
           window.ApptentiveSDK.engage("single-use-prompt-enroll");
-          addHistory("SUPABASE", "Eligible for single-use-prompt; silently sent single-use-prompt-enroll.");
+          addHistory("SUPABASE", "Eligibility check returned eligible=true; called engage(single-use-prompt-enroll). SDK processing not confirmed.");
         } else {
-          addHistory("SUPABASE", "Previously claimed single-use-prompt; no enrollment event sent.");
+          addHistory("SUPABASE", "Eligibility check returned eligible=false; no enrollment event requested.");
         }
       } catch (error) {
-        addHistory("SUPABASE ERROR", "Automatic eligibility check failed: " + (error?.message || error));
+        addHistory("SUPABASE ERROR", "Eligibility check or enrollment engage call failed: " + (error?.message || error));
         console.error("Automatic single-use eligibility check failed:", error);
       } finally {
         state.seenPromptCheckPending = false;
@@ -911,9 +910,9 @@
 
         const isAuthenticated = await state.auth0Client.isAuthenticated();
         state.authReady = true;
+        addHistory("AUTH", "Auth0 SDK initialized; authentication state resolved.");
         updateAuthUI(isAuthenticated ? await state.auth0Client.getUser() : null);
         startAlchemerConversation();
-        addHistory("AUTH", "Auth0 SDK initialized.");
       } catch (error) {
         state.authReady = true;
         state.authUser = null;
@@ -966,7 +965,7 @@
         const data = await response.json();
         if (state.authUser?.sub !== userId) return;
         if (typeof data.reserved !== "boolean") throw new Error("Unexpected claim response.");
-        addHistory("SUPABASE", data.reserved ? "Single-use prompt claimed from button." : "Single-use prompt already claimed.");
+        addHistory("SUPABASE", data.reserved ? "Supabase confirmed single-use-prompt claim from button." : "Supabase reports single-use-prompt was already claimed.");
       } catch (error) {
         addHistory("SUPABASE ERROR", "Could not claim single-use prompt: " + (error?.message || error));
         console.error("Single-use prompt button claim failed:", error);
@@ -985,7 +984,7 @@
         sdk.engage(eventName);
         if (eventName === "single-use-prompt") void claimSingleUsePromptFromButton();
         $("lastEvent").textContent = eventName;
-        addHistory("EVENT", "Called engage('" + eventName + "')");
+        addHistory("EVENT", "Called engage('" + eventName + "'); delivery and display not confirmed");
 
       } catch (error) {
         addHistory("ERROR", "Could not send '" + eventName + "': " + (error.message || error));
@@ -1077,7 +1076,7 @@
         const detail = event.detail;
         console.log("Alchemer rendered interaction detail:", detail);
         const interactionId = detail?.interaction_id || detail?.interactionId || detail?.interaction?.id || detail?.interaction?.interaction_id || detail?.id;
-        addHistory("INTERACTION", "Apptentive rendered an interaction" + (interactionId ? ": " + interactionId : " (ID not provided)"));
+        addHistory("INTERACTION", "apptentive:render:interaction received" + (interactionId ? ": " + interactionId : " (ID not provided)"));
         if (interactionId !== "6adfd147cd1d2b006e43aab2") return;
         const userId = state.authUser?.sub;
         if (!userId || !state.auth0Client || state.singleUseClaimPending) return;
@@ -1096,7 +1095,7 @@
           const data = await response.json();
           if (state.authUser?.sub !== userId) return;
           if (data.reserved === true || data.reserved === false) {
-            addHistory("SUPABASE", "Single-use prompt rendered; " + (data.reserved ? "claimed interaction." : "interaction already claimed."));
+            addHistory("SUPABASE", "Matching render event received; " + (data.reserved ? "claimed interaction." : "interaction already claimed."));
           } else {
             throw new Error("Unexpected claim response.");
           }
@@ -1122,8 +1121,8 @@
         });
       });
 
-      addHistory("SYSTEM", "Page loaded; creating a fresh Alchemer conversation and using Auth0 / Supabase for persistent targeting.");
-      addHistory("STORAGE", "Removed " + (window.__apptentiveResetCount || 0) + " Apptentive-prefixed localStorage entries before SDK load." + (window.__apptentiveResetError ? " Reset error: " + window.__apptentiveResetError : ""));
+      addHistory("SYSTEM", "Page DOM ready; handlers registered. Auth0 and Alchemer initialization are asynchronous.");
+      addHistory("STORAGE", "Pre-SDK cleanup removed " + (window.__apptentiveResetCount || 0) + " Apptentive-prefixed localStorage entries." + (window.__apptentiveResetError ? " Reset error: " + window.__apptentiveResetError : ""));
       if (window.__apptentiveScriptLoaded) {
         setSdkLoaded();
       } else if (window.__apptentiveScriptFailed) {
