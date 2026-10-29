@@ -182,6 +182,7 @@
     .tone-bad { color: var(--red); }
 
     .main-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+    .main-grid { margin-bottom: 20px; }
     .history-panel { margin-top: 20px; }
     .stack { display: grid; gap: 20px; min-width: 0; }
     .panel { padding: 24px; min-width: 0; }
@@ -190,6 +191,13 @@
     .panel-heading p { margin-bottom: 0; color: var(--muted); font-size: 0.88rem; }
     .section-kicker { color: var(--muted); font-size: 0.8rem; }
 
+    .tool-console { margin-top: 18px; overflow: hidden; border: 1px solid #dbe4ef; border-radius: 13px; background: #f7f9fc; }
+    .tool-console-heading { display: flex; align-items: center; gap: 9px; padding: 10px 14px; border-bottom: 1px solid #dbe4ef; color: #47566e; font-size: 0.76rem; font-weight: 750; letter-spacing: 0.02em; }
+    .tool-console-dot { width: 8px; height: 8px; border-radius: 50%; background: #32a879; }
+    .tool-console-label { margin-left: auto; font-size: 0.68rem; color: #7c8ba1; }
+    .tool-console-output { min-height: 62px; padding: 14px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.82rem; color: #35445e; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .tool-console-output[data-tone="success"] { color: #176b4b; }
+    .tool-console-output[data-tone="error"] { color: #a32232; }
     .event-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .event-button {
       display: flex;
@@ -488,10 +496,32 @@
         <section class="panel">
           <div class="panel-heading">
             <div>
+              <h2>Tools</h2>
+              <p>Check the Auth0 / Supabase connection or reset your account's interaction history.</p>
+            </div>
+            <span class="section-kicker">02 / Tools</span>
+          </div>
+          <div class="event-buttons">
+            <button class="event-button" type="button" id="testSupabaseButton" disabled>
+              <span class="event-symbol">✓</span><span><span class="event-title">Test Auth0 / Supabase</span><span class="event-description">Verify authentication and backend access</span></span>
+            </button>
+            <button class="event-button" type="button" id="resetInteractionsButton" disabled>
+              <span class="event-symbol">↺</span><span><span class="event-title">Reset interactions</span><span class="event-description">Clear all Supabase interaction records for this account</span></span>
+            </button>
+          </div>
+          <div class="tool-console" aria-label="Tools console">
+            <div class="tool-console-heading"><span class="tool-console-dot"></span>Console <span class="tool-console-label">AUTH0 / SUPABASE</span></div>
+            <div id="supabaseTestResult" class="tool-console-output" role="status" aria-live="polite">Sign in with Auth0 to use these tools.</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
               <h2>Custom event</h2>
               <p>Send your own event name for testing.</p>
             </div>
-            <span class="section-kicker">02 / Custom</span>
+            <span class="section-kicker">03 / Custom</span>
           </div>
           <form class="custom-event" id="customEventForm">
             <input class="text-input" id="customEvent" type="text" maxlength="120" placeholder="e.g. checkout-started" aria-label="Custom event name" required>
@@ -506,10 +536,10 @@
     <section class="panel">
       <div class="panel-heading">
         <div>
-          <h2>Specific test events</h2>
+          <h2>Events</h2>
           <p>Dedicated triggers for campaigns you are currently testing. Add or remove events here as needed.</p>
         </div>
-        <span class="section-kicker">03 / Testing</span>
+        <span class="section-kicker">04 / Events</span>
       </div>
       <div class="event-buttons">
         <button class="event-button sdk-action" type="button" data-event="single-use-prompt">
@@ -520,29 +550,6 @@
         </button>
       </div>
       <p class="helper">These buttons send the named events. Whether a prompt or survey appears depends on its Alchemer targeting and eligibility.</p>
-    </section>
-
-    <section class="panel">
-      <div class="panel-heading">
-        <div>
-          <h2>Supabase interaction testing</h2>
-          <p>Test account-wide eligibility for the single-use prompt, independently of Alchemer's conversation ID.</p>
-        </div>
-        <span class="section-kicker">04 / Backend</span>
-      </div>
-      <div class="event-buttons">
-        <button class="event-button" type="button" id="testSupabaseButton" disabled>
-          <span class="event-symbol">✓</span><span><span class="event-title">Check eligibility</span><span class="event-description">Read current single-use-prompt status</span></span>
-        </button>
-        <button class="event-button" type="button" id="claimInteractionButton" disabled>
-          <span class="event-symbol">＋</span><span><span class="event-title">Claim interaction</span><span class="event-description">Reserve single-use-prompt for this account</span></span>
-        </button>
-        <button class="event-button" type="button" id="resetInteractionsButton" disabled>
-          <span class="event-symbol">↺</span><span><span class="event-title">Reset interactions</span><span class="event-description">Delete all interaction history for this account</span></span>
-        </button>
-      </div>
-      <p class="helper" id="supabaseTestResult" role="status">Sign in with Auth0 to test interaction history.</p>
-      <p class="helper">Reset affects Supabase records for your account only; it does not reset Alchemer's built-in frequency limits.</p>
     </section>
 
     <section class="panel history-panel">
@@ -736,7 +743,7 @@
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
       updateAuthProfile(user);
-      ["testSupabaseButton", "claimInteractionButton", "resetInteractionsButton"].forEach(id => $(id).disabled = !user || state.interactionTestBusy);
+      ["testSupabaseButton", "resetInteractionsButton"].forEach(id => $(id).disabled = !user || state.interactionTestBusy);
       $("loginButton").hidden = Boolean(user);
       $("signupButton").hidden = Boolean(user);
       $("logoutButton").hidden = !user;
@@ -818,15 +825,17 @@
     async function runInteractionTest(action) {
       const result = $("supabaseTestResult");
       if (!state.authReady || !state.authUser || !state.auth0Client) {
-        result.textContent = "Sign in with Auth0 before testing.";
+        result.dataset.tone = "error";
+        result.textContent = "Sign in with Auth0 to use these tools.";
         return;
       }
       if (state.interactionTestBusy) return;
       if (action === "reset" && !window.confirm("Delete ALL Supabase interaction history for your signed-in Auth0 account? This cannot be undone.")) return;
       state.interactionTestBusy = true;
-      const buttons = ["testSupabaseButton", "claimInteractionButton", "resetInteractionsButton"];
+      const buttons = ["testSupabaseButton", "resetInteractionsButton"];
       buttons.forEach(id => $(id).disabled = true);
-      result.textContent = action === "reset" ? "Resetting interaction history..." : action === "claim" ? "Claiming single-use-prompt..." : "Checking eligibility...";
+      result.dataset.tone = "";
+      result.textContent = action === "reset" ? "Resetting interaction history..." : "Testing Auth0 / Supabase connection...";
       try {
         const userId = state.authUser.sub;
         const token = await state.auth0Client.getTokenSilently({
@@ -836,20 +845,28 @@
         const response = await fetch("https://tvclkybldunxpmzlfrne.supabase.co/functions/v1/Interaction-Tracking", {
           method: "POST",
           headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-          body: JSON.stringify({ action, interaction_id: "single-use-prompt" })
+          body: JSON.stringify({ action: action === "reset" ? "reset" : "check", interaction_id: "single-use-prompt" })
         });
         const raw = await response.text();
         let data;
         try { data = JSON.parse(raw); } catch { data = { message: raw.slice(0, 250) }; }
         if (state.authUser?.sub !== userId) throw new Error("Signed-in account changed during the request.");
-        const detail = JSON.stringify(data);
-        result.textContent = action.toUpperCase() + " — HTTP " + response.status + ": " + detail;
-        addHistory(response.ok ? "SUPABASE" : "SUPABASE ERROR", action + " — HTTP " + response.status + ": " + detail);
+        if (!response.ok) throw new Error("HTTP " + response.status + ": " + JSON.stringify(data));
+        if (action === "reset") {
+          if (data.reset !== true) throw new Error("Unexpected reset response.");
+          result.textContent = "✓ Interactions reset successfully.\nAll Supabase interaction records for your account have been cleared. Refresh to re-enroll.";
+        } else {
+          if (typeof data.eligible !== "boolean") throw new Error("Unexpected connection test response.");
+          result.textContent = "✓ Auth0 / Supabase connected\nAPI authentication: successful\nSingle-use prompt: " + (data.eligible ? "Eligible" : "Already claimed");
+        }
+        result.dataset.tone = "success";
+        addHistory("SUPABASE", action === "reset" ? "All interactions reset." : "Auth0 / Supabase connection verified.");
       } catch (error) {
         const message = error?.message || String(error);
-        result.textContent = "Test failed: " + message;
+        result.dataset.tone = "error";
+        result.textContent = "✕ " + (action === "reset" ? "Reset failed" : "Connection test failed") + "\n" + message;
         addHistory("SUPABASE ERROR", action + ": " + message);
-        console.error("Supabase interaction test failed:", error);
+        console.error("Supabase tool failed:", error);
       } finally {
         state.interactionTestBusy = false;
         buttons.forEach(id => $(id).disabled = !state.authUser);
@@ -945,7 +962,6 @@
     function sendEvent(eventName, isLoveDialog) {
       if (!state.sdkReady || !state.conversationRequested) {
         addHistory("ERROR", "Cannot send '" + eventName + "' before the anonymous conversation has been requested.");
-        showToast("Conversation not ready", "Wait for the conversation request to complete.");
         return;
       }
 
@@ -957,14 +973,8 @@
         $("lastEvent").textContent = eventName;
         addHistory("EVENT", "Called engage('" + eventName + "')");
 
-        if (isLoveDialog) {
-          showToast("Love Dialog event sent", "The interaction appears only if a matching campaign is configured and eligible.");
-        } else {
-          showToast("Event sent", eventName);
-        }
       } catch (error) {
         addHistory("ERROR", "Could not send '" + eventName + "': " + (error.message || error));
-        showToast("Event failed", error.message || "The SDK could not send this event.");
         console.error(error);
       }
     }
@@ -1004,7 +1014,6 @@
 
       $("messageCenterButton").addEventListener("click", openMessageCenter);
       $("testSupabaseButton").addEventListener("click", () => runInteractionTest("check"));
-      $("claimInteractionButton").addEventListener("click", () => runInteractionTest("claim"));
       $("resetInteractionsButton").addEventListener("click", () => runInteractionTest("reset"));
 
       $("clearHistoryButton").addEventListener("click", () => {
