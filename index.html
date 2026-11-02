@@ -128,12 +128,13 @@
 
     .hero {
       display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 28px;
+      align-items: center;
+      gap: 16px;
       margin-bottom: 30px;
     }
 
+    .hero-logo { width: 64px; height: 64px; object-fit: contain; flex-shrink: 0; }
+    .hero h1 { margin-bottom: 0; }
     h1, h2, h3, p { margin-top: 0; }
     h1 {
       margin-bottom: 10px;
@@ -182,6 +183,7 @@
     .tone-bad { color: var(--red); }
 
     .main-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+    .main-grid { margin-bottom: 20px; }
     .history-panel { margin-top: 20px; }
     .stack { display: grid; gap: 20px; min-width: 0; }
     .panel { padding: 24px; min-width: 0; }
@@ -190,6 +192,13 @@
     .panel-heading p { margin-bottom: 0; color: var(--muted); font-size: 0.88rem; }
     .section-kicker { color: var(--muted); font-size: 0.8rem; }
 
+    .tool-console { margin-top: 18px; overflow: hidden; border: 1px solid #dbe4ef; border-radius: 13px; background: #f7f9fc; }
+    .tool-console-heading { display: flex; align-items: center; gap: 9px; padding: 10px 14px; border-bottom: 1px solid #dbe4ef; color: #47566e; font-size: 0.76rem; font-weight: 750; letter-spacing: 0.02em; }
+    .tool-console-dot { width: 8px; height: 8px; border-radius: 50%; background: #32a879; }
+    .tool-console-label { margin-left: auto; font-size: 0.68rem; color: #7c8ba1; }
+    .tool-console-output { min-height: 62px; padding: 14px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.82rem; color: #35445e; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .tool-console-output[data-tone="success"] { color: #176b4b; }
+    .tool-console-output[data-tone="error"] { color: #a32232; }
     .event-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .event-button {
       display: flex;
@@ -352,6 +361,7 @@
     }
     @media (max-width: 560px) {
       .page { padding-top: 24px; }
+      .hero-logo { width: 48px; height: 48px; }
       .panel { padding: 16px; }
       .status-card { padding: 12px; }
       .header-inner, .page { width: calc(100% - 24px); }
@@ -364,6 +374,23 @@
     }
   </style>
 
+  <script>
+    // Testing mode: discard only recognizable Apptentive localStorage entries
+    // before loading the SDK. Never clear Auth0 or unrelated site storage.
+    (function resetApptentiveTestStorage() {
+      try {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && /^apptentive/i.test(key)) keys.push(key);
+        }
+        keys.forEach(key => localStorage.removeItem(key));
+        window.__apptentiveResetCount = keys.length;
+      } catch (error) {
+        window.__apptentiveResetError = String(error);
+      }
+    })();
+  </script>
   <script>
     (function initApptentiveSDK() {
       var ApptentiveSDK = window.ApptentiveSDK = window.ApptentiveSDK || [];
@@ -410,9 +437,8 @@
 
   <main class="page">
     <section class="hero">
-      <div>
-        <h1>SDK Testing</h1>
-      </div>
+      <img class="hero-logo" src="./Lucario.png" alt="Lucario" width="64" height="64">
+      <h1>Matt's Web App</h1>
     </section>
 
     <section class="status-grid" aria-label="SDK status">
@@ -471,10 +497,35 @@
         <section class="panel">
           <div class="panel-heading">
             <div>
+              <h2>Tools</h2>
+              <p>Check the Auth0 / Supabase connection or reset your account's interaction history.</p>
+            </div>
+            <span class="section-kicker">02 / Tools</span>
+          </div>
+          <div class="event-buttons">
+            <button class="event-button" type="button" id="testSupabaseButton" disabled>
+              <span class="event-symbol">✓</span><span><span class="event-title">Test Auth0 / Supabase</span><span class="event-description">Verify authentication and backend access</span></span>
+            </button>
+            <button class="event-button" type="button" id="listInteractionsButton" disabled>
+              <span class="event-symbol">≡</span><span><span class="event-title">View interaction eligibility</span><span class="event-description">List known interactions and account eligibility</span></span>
+            </button>
+            <button class="event-button" type="button" id="resetInteractionsButton" disabled>
+              <span class="event-symbol">↺</span><span><span class="event-title">Reset interactions</span><span class="event-description">Clear all Supabase interaction records for this account</span></span>
+            </button>
+          </div>
+          <div class="tool-console" aria-label="Tools console">
+            <div class="tool-console-heading"><span class="tool-console-dot"></span>Console <span class="tool-console-label">AUTH0 / SUPABASE</span></div>
+            <div id="supabaseTestResult" class="tool-console-output" role="status" aria-live="polite">Sign in with Auth0 to use these tools.</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
               <h2>Custom event</h2>
               <p>Send your own event name for testing.</p>
             </div>
-            <span class="section-kicker">02 / Custom</span>
+            <span class="section-kicker">03 / Custom</span>
           </div>
           <form class="custom-event" id="customEventForm">
             <input class="text-input" id="customEvent" type="text" maxlength="120" placeholder="e.g. checkout-started" aria-label="Custom event name" required>
@@ -485,6 +536,25 @@
       </div>
 
     </div>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Events</h2>
+          <p>Dedicated triggers for campaigns you are currently testing. Add or remove events here as needed.</p>
+        </div>
+        <span class="section-kicker">04 / Events</span>
+      </div>
+      <div class="event-buttons">
+        <button class="event-button sdk-action" type="button" data-event="single-use-prompt">
+          <span class="event-symbol">✦</span><span><span class="event-title">Single-use prompt</span><span class="event-description">Event: single-use-prompt</span></span>
+        </button>
+        <button class="event-button sdk-action" type="button" data-event="all-question-survey">
+          <span class="event-symbol">▤</span><span><span class="event-title">All-questions survey</span><span class="event-description">Event: all-question-survey</span></span>
+        </button>
+      </div>
+      <p class="helper">These buttons send the named events. Whether a prompt or survey appears depends on its Alchemer targeting and eligibility.</p>
+    </section>
 
     <section class="panel history-panel">
       <div class="panel-heading">
@@ -513,7 +583,12 @@
       authUser: null,
       authReady: false,
       personIdentified: false,
-      conversationStarting: false
+      conversationStarting: false,
+      authFailed: false,
+      interactionTestBusy: false,
+      seenPromptCheckedFor: null,
+      seenPromptCheckPending: false,
+      singleUseClaimPending: false
     };
 
     const $ = (id) => document.getElementById(id);
@@ -590,7 +665,7 @@
       state.sdkReady = true;
       setStatus("sdkStatus", "Loaded", "tone-good");
       $("sdkDetail").textContent = "SDK script loaded";
-      addHistory("SDK", "Alchemer Web SDK script loaded");
+      addHistory("SDK", "Alchemer SDK loader completed; createConversation API available.");
 
       try {
         sdk.setOption("debug", true);
@@ -605,6 +680,7 @@
       if (!state.sdkReady || !state.authReady || state.conversationStarting || state.conversationRequested) return;
 
       const sdk = window.ApptentiveSDK;
+      // Wait for Auth0 to resolve so a fresh conversation has the right identity.
       const user = state.authUser;
       state.conversationStarting = true;
       setStatus("conversationStatus", "Initializing", "tone-neutral");
@@ -615,21 +691,15 @@
         setStatus("conversationStatus", "Initialized", "tone-good");
         $("sdkDetail").textContent = "SDK loaded; conversation initialized";
         enableSdkControls();
-        addHistory("CONVERSATION", user ? "Conversation initialized for the signed-in Auth0 user." : "Anonymous conversation initialized.");
+        addHistory("CONVERSATION", user ? "createConversation success callback received for authenticated user." : "createConversation success callback received for anonymous session.");
 
-        if (user) identifyAlchemerUser(user);
+        if (user) addHistory("CUSTOM DATA", "Auth0 person fields were included in the createConversation request.");
 
         if (data && typeof data === "object") {
           const conversationId = data.conversation_id || data.conversationId || data.id;
-          if (conversationId) addHistory("CONVERSATION", "Alchemer conversation ID: " + String(conversationId));
+          if (conversationId) addHistory("CONVERSATION", "Alchemer returned conversation ID: " + String(conversationId));
         }
-
-        if (typeof sdk.doctor === "function") {
-          addHistory("DIAGNOSTICS", "Running ApptentiveSDK.doctor(); inspect the browser console for conversation details.");
-          sdk.doctor();
-        } else {
-          addHistory("DIAGNOSTICS", "For conversation details, run ApptentiveSDK.doctor() in the browser console.");
-        }
+        syncSeenSingleUsePrompt();
       };
 
       const fail = (error) => {
@@ -642,42 +712,70 @@
       };
 
       try {
-        sdk.createConversation({ success: finish, failure: fail });
+        const options = { success: finish, failure: fail };
+        if (user && user.sub) {
+          const email = (user.email || "").trim().toLowerCase();
+          const name = (user.name || user.nickname || "").trim();
+          options.person = {
+            custom_data: {
+              auth_provider: "auth0",
+              customer_id: user.sub,
+              auth0_user_id: user.sub,
+              authenticated: true
+            }
+          };
+          if (email) options.person.email = email;
+          if (name) options.person.name = name;
+        }
+        addHistory("CONVERSATION", user ? "Calling createConversation with Auth0 person fields." : "Calling createConversation without authenticated person fields.");
+        sdk.createConversation(options);
       } catch (error) {
         fail(error);
       }
     }
 
     function updateAuthUI(user) {
+      if (state.authUser?.sub !== user?.sub) state.seenPromptCheckedFor = null;
       state.authUser = user || null;
+      if (!state.interactionTestBusy) {
+        const result = $("supabaseTestResult");
+        result.dataset.tone = "";
+        result.textContent = user
+          ? "Signed in. Choose a tool above to view results."
+          : "Sign in with Auth0 to use these tools.";
+      }
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
       updateAuthProfile(user);
+      ["testSupabaseButton", "listInteractionsButton", "resetInteractionsButton"].forEach(id => $(id).disabled = !user || state.interactionTestBusy);
       $("loginButton").hidden = Boolean(user);
       $("signupButton").hidden = Boolean(user);
       $("logoutButton").hidden = !user;
       if (user) {
-        addHistory("AUTH", "Authenticated as " + (user.email || user.name || user.sub));
+        addHistory("AUTH", "Auth0 SDK reports authenticated user: " + (user.email || user.name || user.sub));
       } else {
-        addHistory("AUTH", "No authenticated Auth0 user.");
+        addHistory("AUTH", "Auth0 SDK reports no authenticated user.");
       }
+      if (state.authReady && user && state.conversationRequested && !state.personIdentified) identifyAlchemerUser(user);
       startAlchemerConversation();
+      syncSeenSingleUsePrompt();
     }
 
     function identifyAlchemerUser(user) {
-      if (!user || !user.email || state.personIdentified) return;
+      if (!user || state.personIdentified) return;
 
-      const email = user.email.trim().toLowerCase();
+      const email = (user.email || "").trim().toLowerCase();
       const name = (user.name || user.nickname || "").trim();
       const person = {
-        unique_token: email,
-        email: email,
         custom_data: {
-          customer_id: email,
-          email: email
+          customer_id: user.sub,
+              auth0_user_id: user.sub,
+          auth_provider: "auth0",
+          authenticated: true
         }
       };
 
+      if (email) person.email = email;
       if (name) {
         person.name = name;
         person.custom_data.name = name;
@@ -686,11 +784,106 @@
       try {
         window.ApptentiveSDK.identifyPerson(person);
         state.personIdentified = true;
-        addHistory("ALCHEMER IDENTITY", "Identified the Alchemer person by email and sent email/name custom data.");
+        addHistory("ALCHEMER IDENTITY", "Called identifyPerson with Auth0 person fields; SDK acceptance not independently confirmed.");
         showToast("Alchemer identity updated", "The signed-in user's email and name were sent to Alchemer.");
       } catch (error) {
         addHistory("ERROR", "Could not identify the Auth0 user in Alchemer: " + (error.message || error));
         console.error(error);
+      }
+    }
+
+    async function syncSeenSingleUsePrompt() {
+      const user = state.authUser;
+      if (!state.sdkReady || !state.conversationRequested || !user?.sub || !state.auth0Client) return;
+      if (state.seenPromptCheckedFor === user.sub || state.seenPromptCheckPending) return;
+      state.seenPromptCheckPending = true;
+      const userId = user.sub;
+      try {
+        const token = await state.auth0Client.getTokenSilently({
+          authorizationParams: { audience: "https://alchemer-interaction-api" }
+        });
+        const response = await fetch("https://tvclkybldunxpmzlfrne.supabase.co/functions/v1/Interaction-Tracking", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "check", interaction_id: "single-use-prompt" })
+        });
+        if (!response.ok) throw new Error("Eligibility check returned HTTP " + response.status);
+        const data = await response.json();
+        if (state.authUser?.sub !== userId || !state.conversationRequested) return;
+        if (typeof data.eligible !== "boolean") throw new Error("Unexpected eligibility response.");
+        state.seenPromptCheckedFor = userId;
+        if (data.eligible === true) {
+          window.ApptentiveSDK.engage("single-use-prompt-enroll");
+          addHistory("SUPABASE", "Eligibility check returned eligible=true; called engage(single-use-prompt-enroll). SDK processing not confirmed.");
+        } else {
+          addHistory("SUPABASE", "Eligibility check returned eligible=false; no enrollment event requested.");
+        }
+      } catch (error) {
+        addHistory("SUPABASE ERROR", "Eligibility check or enrollment engage call failed: " + (error?.message || error));
+        console.error("Automatic single-use eligibility check failed:", error);
+      } finally {
+        state.seenPromptCheckPending = false;
+      }
+    }
+
+    async function runInteractionTest(action) {
+      const result = $("supabaseTestResult");
+      if (!state.authReady || !state.authUser || !state.auth0Client) {
+        result.dataset.tone = "error";
+        result.textContent = "Sign in with Auth0 to use these tools.";
+        return;
+      }
+      if (state.interactionTestBusy) return;
+      if (action === "reset" && !window.confirm("Delete ALL Supabase interaction history for your signed-in Auth0 account? This cannot be undone.")) return;
+      state.interactionTestBusy = true;
+      const buttons = ["testSupabaseButton", "listInteractionsButton", "resetInteractionsButton"];
+      buttons.forEach(id => $(id).disabled = true);
+      result.dataset.tone = "";
+      result.textContent = action === "reset" ? "Resetting interaction history..." : action === "list" ? "Loading interaction eligibility..." : "Testing Auth0 / Supabase connection...";
+      try {
+        const userId = state.authUser.sub;
+        const token = await state.auth0Client.getTokenSilently({
+          authorizationParams: { audience: "https://alchemer-interaction-api" }
+        });
+        if (state.authUser?.sub !== userId) throw new Error("Signed-in account changed during the request.");
+        const response = await fetch("https://tvclkybldunxpmzlfrne.supabase.co/functions/v1/Interaction-Tracking", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ action: action === "reset" ? "reset" : action === "list" ? "list" : "check", interaction_id: "single-use-prompt" })
+        });
+        const raw = await response.text();
+        let data;
+        try { data = JSON.parse(raw); } catch { data = { message: raw.slice(0, 250) }; }
+        if (state.authUser?.sub !== userId) throw new Error("Signed-in account changed during the request.");
+        if (!response.ok) throw new Error("HTTP " + response.status + ": " + JSON.stringify(data));
+        if (action === "reset") {
+          if (data.reset !== true) throw new Error("Unexpected reset response.");
+          result.textContent = "✓ Interactions reset successfully.\nAll Supabase interaction records for your account have been cleared. Refresh to re-enroll.";
+        } else if (action === "list") {
+          if (!Array.isArray(data.interactions)) throw new Error("Unexpected interaction list response.");
+          const rows = data.interactions;
+          const lines = rows.map(item => {
+            if (typeof item.interaction_id !== "string" || typeof item.eligible !== "boolean") throw new Error("Invalid interaction entry.");
+            return (item.eligible ? "✓ ELIGIBLE   " : "✕ INELIGIBLE ") + item.interaction_id +
+              (item.eligible ? "" : " (" + (item.status || "claimed") + ")");
+          });
+          result.textContent = "Interaction eligibility — " + rows.length + " known\n" +
+            (lines.length ? lines.join("\n") : "No known interactions returned.");
+        } else {
+          if (typeof data.eligible !== "boolean") throw new Error("Unexpected connection test response.");
+          result.textContent = "✓ Auth0 / Supabase connected\nAPI authentication: successful\nSingle-use prompt: " + (data.eligible ? "Eligible" : "Already claimed");
+        }
+        result.dataset.tone = "success";
+        addHistory("SUPABASE", action === "reset" ? "All interactions reset." : action === "list" ? "Interaction eligibility list loaded." : "Auth0 / Supabase connection verified.");
+      } catch (error) {
+        const message = error?.message || String(error);
+        result.dataset.tone = "error";
+        result.textContent = "✕ " + (action === "reset" ? "Reset failed" : action === "list" ? "Eligibility list failed" : "Connection test failed") + "\n" + message;
+        addHistory("SUPABASE ERROR", action + ": " + message);
+        console.error("Supabase tool failed:", error);
+      } finally {
+        state.interactionTestBusy = false;
+        buttons.forEach(id => $(id).disabled = !state.authUser);
       }
     }
 
@@ -702,7 +895,7 @@
         state.auth0Client = await window.auth0.createAuth0Client({
           domain: "dev-q1lngtdo3cgl4m8c.us.auth0.com",
           clientId: "ZtCJT5jQo3Wegk1GJsSnjG6oA4K2kqm1",
-          authorizationParams: { redirect_uri: window.location.origin }
+          authorizationParams: { redirect_uri: window.location.origin, audience: "https://alchemer-interaction-api" }
         });
 
         if (window.location.search.includes("error=")) {
@@ -717,10 +910,10 @@
         }
 
         const isAuthenticated = await state.auth0Client.isAuthenticated();
-        updateAuthUI(isAuthenticated ? await state.auth0Client.getUser() : null);
         state.authReady = true;
+        addHistory("AUTH", "Auth0 SDK initialized; authentication state resolved.");
+        updateAuthUI(isAuthenticated ? await state.auth0Client.getUser() : null);
         startAlchemerConversation();
-        addHistory("AUTH", "Auth0 SDK initialized.");
       } catch (error) {
         state.authReady = true;
         state.authUser = null;
@@ -737,7 +930,7 @@
         return;
       }
       try {
-        const options = { authorizationParams: {} };
+        const options = { authorizationParams: { audience: "https://alchemer-interaction-api" } };
         if (signup) options.authorizationParams.screen_hint = "signup";
         await state.auth0Client.loginWithRedirect(options);
       } catch (error) {
@@ -753,10 +946,36 @@
       state.auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
     }
 
+    async function claimSingleUsePromptFromButton() {
+      const userId = state.authUser?.sub;
+      if (!userId || !state.auth0Client) {
+        addHistory("SUPABASE ERROR", "Sign in with Auth0 to claim single-use-prompt.");
+        return;
+      }
+      try {
+        const token = await state.auth0Client.getTokenSilently({
+          authorizationParams: { audience: "https://alchemer-interaction-api" }
+        });
+        if (state.authUser?.sub !== userId) return;
+        const response = await fetch("https://tvclkybldunxpmzlfrne.supabase.co/functions/v1/Interaction-Tracking", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "claim", interaction_id: "single-use-prompt" })
+        });
+        if (!response.ok) throw new Error("Claim returned HTTP " + response.status);
+        const data = await response.json();
+        if (state.authUser?.sub !== userId) return;
+        if (typeof data.reserved !== "boolean") throw new Error("Unexpected claim response.");
+        addHistory("SUPABASE", data.reserved ? "Supabase confirmed single-use-prompt claim from button." : "Supabase reports single-use-prompt was already claimed.");
+      } catch (error) {
+        addHistory("SUPABASE ERROR", "Could not claim single-use prompt: " + (error?.message || error));
+        console.error("Single-use prompt button claim failed:", error);
+      }
+    }
+
     function sendEvent(eventName, isLoveDialog) {
       if (!state.sdkReady || !state.conversationRequested) {
         addHistory("ERROR", "Cannot send '" + eventName + "' before the anonymous conversation has been requested.");
-        showToast("Conversation not ready", "Wait for the conversation request to complete.");
         return;
       }
 
@@ -764,17 +983,12 @@
 
       try {
         sdk.engage(eventName);
+        if (eventName === "single-use-prompt") void claimSingleUsePromptFromButton();
         $("lastEvent").textContent = eventName;
-        addHistory("EVENT", "Called engage('" + eventName + "')");
+        addHistory("EVENT", "Called engage('" + eventName + "'); delivery and display not confirmed");
 
-        if (isLoveDialog) {
-          showToast("Love Dialog event sent", "The interaction appears only if a matching campaign is configured and eligible.");
-        } else {
-          showToast("Event sent", eventName);
-        }
       } catch (error) {
         addHistory("ERROR", "Could not send '" + eventName + "': " + (error.message || error));
-        showToast("Event failed", error.message || "The SDK could not send this event.");
         console.error(error);
       }
     }
@@ -813,6 +1027,9 @@
       });
 
       $("messageCenterButton").addEventListener("click", openMessageCenter);
+      $("testSupabaseButton").addEventListener("click", () => runInteractionTest("check"));
+      $("listInteractionsButton").addEventListener("click", () => runInteractionTest("list"));
+      $("resetInteractionsButton").addEventListener("click", () => runInteractionTest("reset"));
 
       $("clearHistoryButton").addEventListener("click", () => {
         $("eventHistory").replaceChildren();
@@ -847,17 +1064,46 @@
         const message = detail ? (detail.message || detail.error || JSON.stringify(detail)) : "No error details were provided.";
         console.error("Survey error:", detail);
         addHistory("SURVEY ERROR", String(message));
-        showToast("Survey error", String(message));
       });
 
       document.addEventListener("apptentive:survey:submit", event => {
         console.log("Survey submitted:", event.detail);
         addHistory("SURVEY SUBMITTED", "The survey submitted event was received.");
-        showToast("Survey submitted", "The SDK reported a survey submission event.");
       });
 
-      document.addEventListener("apptentive:render:interaction", () => {
-        addHistory("INTERACTION", "Apptentive rendered an interaction");
+      document.addEventListener("apptentive:render:interaction", async event => {
+        const detail = event.detail;
+        console.log("Alchemer rendered interaction detail:", detail);
+        const interactionId = detail?.interaction_id || detail?.interactionId || detail?.interaction?.id || detail?.interaction?.interaction_id || detail?.id;
+        addHistory("INTERACTION", "apptentive:render:interaction received" + (interactionId ? ": " + interactionId : " (ID not provided)"));
+        if (interactionId !== "6adfd147cd1d2b006e43aab2") return;
+        const userId = state.authUser?.sub;
+        if (!userId || !state.auth0Client || state.singleUseClaimPending) return;
+        state.singleUseClaimPending = true;
+        try {
+          const token = await state.auth0Client.getTokenSilently({
+            authorizationParams: { audience: "https://alchemer-interaction-api" }
+          });
+          if (state.authUser?.sub !== userId) return;
+          const response = await fetch("https://tvclkybldunxpmzlfrne.supabase.co/functions/v1/Interaction-Tracking", {
+            method: "POST",
+            headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "claim", interaction_id: "single-use-prompt" })
+          });
+          if (!response.ok) throw new Error("Claim returned HTTP " + response.status);
+          const data = await response.json();
+          if (state.authUser?.sub !== userId) return;
+          if (data.reserved === true || data.reserved === false) {
+            addHistory("SUPABASE", "Matching render event received; " + (data.reserved ? "claimed interaction." : "interaction already claimed."));
+          } else {
+            throw new Error("Unexpected claim response.");
+          }
+        } catch (error) {
+          addHistory("SUPABASE ERROR", "Could not claim rendered single-use prompt: " + (error?.message || error));
+          console.error("Automatic single-use prompt claim failed:", error);
+        } finally {
+          state.singleUseClaimPending = false;
+        }
       });
 
       [
@@ -874,7 +1120,8 @@
         });
       });
 
-      addHistory("SYSTEM", "Page loaded; waiting for the Alchemer Web SDK script.");
+      addHistory("SYSTEM", "Page DOM ready; handlers registered. Auth0 and Alchemer initialization are asynchronous.");
+      addHistory("STORAGE", "Pre-SDK cleanup removed " + (window.__apptentiveResetCount || 0) + " Apptentive-prefixed localStorage entries." + (window.__apptentiveResetError ? " Reset error: " + window.__apptentiveResetError : ""));
       if (window.__apptentiveScriptLoaded) {
         setSdkLoaded();
       } else if (window.__apptentiveScriptFailed) {
