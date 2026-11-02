@@ -128,12 +128,13 @@
 
     .hero {
       display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 28px;
+      align-items: center;
+      gap: 16px;
       margin-bottom: 30px;
     }
 
+    .hero-logo { width: 64px; height: 64px; object-fit: contain; flex-shrink: 0; }
+    .hero h1 { margin-bottom: 0; }
     h1, h2, h3, p { margin-top: 0; }
     h1 {
       margin-bottom: 10px;
@@ -360,6 +361,7 @@
     }
     @media (max-width: 560px) {
       .page { padding-top: 24px; }
+      .hero-logo { width: 48px; height: 48px; }
       .panel { padding: 16px; }
       .status-card { padding: 12px; }
       .header-inner, .page { width: calc(100% - 24px); }
@@ -435,9 +437,8 @@
 
   <main class="page">
     <section class="hero">
-      <div>
-        <h1>SDK Testing</h1>
-      </div>
+      <img class="hero-logo" src="./Lucario.png" alt="Lucario" width="64" height="64">
+      <h1>Matt's Web App</h1>
     </section>
 
     <section class="status-grid" aria-label="SDK status">
