@@ -470,6 +470,59 @@
       .event-entry { grid-template-columns: 1fr; gap: 3px; }
     }
 
+
+    /* Calm, spacious dashboard refinements */
+    body { background: #1d2026; }
+    .site-header { background: #24272e; border-color: #333840; }
+    .header-inner { gap: 36px; }
+    .sidebar-brand { border-color: #373c45; }
+    .brand .top-link, .brand-name.top-link { color: #a9afbb; }
+    .brand .active-link { background: #30343d; border-left-color: #818d9c; }
+    .brand .top-link:hover { background: #343943; }
+    .page { max-width: 1320px; padding: 30px 52px 70px; }
+    .top-account { display: flex; justify-content: flex-end; min-height: 46px; margin-bottom: 28px; }
+    .top-account .header-actions { gap: 10px; justify-content: flex-end; }
+    .top-account .anonymous-pill { width: auto; font-size: .84rem; }
+    .dashboard-heading { margin-bottom: 36px; }
+    .dashboard-overline { color: #a0a9b5; }
+    .dashboard-environment { background: #292e32; border-color: #424d48; color: #a5c8b1; }
+    .status-grid { gap: 18px; margin-bottom: 34px; }
+    .status-card, .panel { background: #282c33; border-color: #393f48; box-shadow: 0 3px 12px rgba(0,0,0,.1); }
+    .status-card { border-top: 1px solid #434a54; padding: 20px; }
+    .status-card:hover, .panel:hover { border-color: #505762; box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+    .main-grid { display: block; margin-bottom: 30px; }
+    .main-grid .stack { display: grid; gap: 30px; }
+    .panel { padding: 0 24px 24px; margin-bottom: 30px; }
+    .main-grid .panel { margin-bottom: 0; }
+    .panel-heading { margin: 0 -24px 24px; padding: 17px 24px; background: #2c3038; border-bottom-color: #3b424b; }
+    .panel-heading p { color: #9da6b5; }
+    .event-buttons { gap: 14px; }
+    .event-button { background: #30343b; border-color: #414751; }
+    .event-button:hover { background: #383d45; border-color: #737e8b; }
+    .event-symbol { color: #bbc6d2; background: #393f49; }
+    .event-entry:nth-child(odd) { background: #2d323a; }
+    .event-type { color: #b5c5d6; }
+    .tool-console { background: #22262d; }
+    .tool-console-heading { background: #2b3038; }
+    .history-panel { margin-top: 0; }
+    .footer { padding-top: 12px; }
+    @media (max-width: 900px) {
+      .page { padding: 25px 30px 50px; }
+      .top-account { margin-bottom: 22px; }
+      .main-grid .stack { gap: 26px; }
+    }
+    @media (max-width: 620px) {
+      .page { padding: 20px 16px 40px; }
+      .top-account { min-height: 0; margin-bottom: 24px; }
+      .top-account .header-actions { justify-content: flex-end; }
+      .top-account .anonymous-pill { width: auto; }
+      .status-grid { gap: 12px; margin-bottom: 26px; }
+      .panel { padding: 0 16px 18px; margin-bottom: 24px; }
+      .panel-heading { margin: 0 -16px 18px; padding: 15px 16px; }
+      .main-grid .stack { gap: 24px; }
+      .dashboard-heading { margin-bottom: 28px; }
+    }
+
   </style>
 
   <script>
@@ -528,19 +581,19 @@
         <a class="brand-name top-link active-link" href="index.html">◫ &nbsp; Dashboard</a>
         <a class="top-link" href="survey-embed.html">▤ &nbsp; Survey Embed</a>
       </nav>
-      <div class="sidebar-account">
-        <div class="sidebar-caption">ACCOUNT</div>
-        <div class="header-actions">
-          <span class="anonymous-pill" id="authStatus"><span class="dot"></span><span id="authStatusText">Signed out</span></span>
-          <button class="button button-secondary button-small" id="loginButton" type="button">Log In</button>
-          <button class="button button-secondary button-small" id="signupButton" type="button">Sign Up</button>
-          <button class="button button-secondary button-small" id="logoutButton" type="button" hidden>Log Out</button>
-        </div>
-      </div>
+
     </div>
   </header>
 
   <main class="page">
+    <div class="top-account">
+      <div class="header-actions">
+        <span class="anonymous-pill" id="authStatus"><span class="dot"></span><span id="authStatusText">Signed out</span></span>
+        <button class="button button-secondary button-small" id="loginButton" type="button">Log In</button>
+        <button class="button button-secondary button-small" id="signupButton" type="button">Sign Up</button>
+        <button class="button button-secondary button-small" id="logoutButton" type="button" hidden>Log Out</button>
+      </div>
+    </div>
     <section class="dashboard-heading">
       <div><span class="dashboard-overline">OVERVIEW</span><h1>SDK Testing Dashboard</h1><p>Alchemer Digital · Auth0 · Supabase</p></div>
       <span class="dashboard-environment">● &nbsp; Testing environment</span>
