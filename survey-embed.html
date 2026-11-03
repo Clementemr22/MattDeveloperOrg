@@ -315,7 +315,7 @@
         <button class="button" type="button" data-width="768">Tablet · 768px</button>
         <button class="button" type="button" data-width="390">Mobile · 390px</button>
       </div>
-      <p class="helper">The preview changes the iframe width, not your browser's viewport.</p>
+      <p class="helper">Changing preview width reloads the survey at the selected size to initialize its responsive layout. Unsaved answers will be lost.</p>
     </section>
     <section class="panel">
       <div class="panel-heading"><h2>Embed Area</h2><p>The survey runs in its own iframe. Loading does not guarantee successful rendering or submission.</p></div>
@@ -331,10 +331,9 @@
       <div class="controls"><button class="button" id="clearLogButton" type="button">Clear activity</button></div>
       <div class="log" id="activityLog" role="log" aria-live="polite"></div>
     </section>
-    <footer class="footer">Matt's Web App · Survey Embed Testing</footer>
   </main>
   <script>
-    const frame = document.getElementById("alchemer-embed");
+    let frame = document.getElementById("alchemer-embed");
     const shell = document.getElementById("embedShell");
     const urlInput = document.getElementById("surveyUrl");
     const log = document.getElementById("activityLog");
@@ -368,10 +367,20 @@
       document.getElementById("frameState").textContent = "Loading";
       loadStartedAt = performance.now();
     }
+    function onFrameLoad() {
+      document.getElementById("frameState").textContent = "Load event received";
+      addLog("IFRAME","Load event received after " + Math.round(performance.now()-loadStartedAt) + "ms; survey content not verified.");
+    }
     function reload(url) {
       setLoading();
-      frame.src = url;
-      addLog("NAVIGATION","Requested iframe navigation to " + url);
+      const nextFrame = frame.cloneNode(false);
+      nextFrame.src = url;
+      nextFrame.style.height = "600px";
+      nextFrame.addEventListener("load", onFrameLoad);
+      frame.replaceWith(nextFrame);
+      frame = nextFrame;
+      document.getElementById("frameHeight").textContent = "Height: 600px";
+      addLog("NAVIGATION","Requested fresh iframe load at " + (currentWidth === "full" ? "full width" : currentWidth + "px") + ": " + url);
     }
     document.getElementById("reloadButton").addEventListener("click", () => reload(frame.src));
     document.getElementById("applyButton").addEventListener("click", () => {
@@ -392,12 +401,10 @@
       document.getElementById("previewLabel").textContent = currentWidth === "full" ? "Full width preview" : currentWidth + "px preview";
       document.querySelectorAll("[data-width]").forEach(item => item.classList.toggle("selected",item === button));
       addLog("PREVIEW","Preview width set to " + (currentWidth === "full" ? "full" : currentWidth + "px") + ".");
+      reload(frame.src);
     }));
     document.getElementById("clearLogButton").addEventListener("click", () => { log.replaceChildren(); addLog("SYSTEM","Activity log cleared."); });
-    frame.addEventListener("load", () => {
-      document.getElementById("frameState").textContent = "Load event received";
-      addLog("IFRAME","Load event received after " + Math.round(performance.now()-loadStartedAt) + "ms; survey content not verified.");
-    });
+    frame.addEventListener("load", onFrameLoad);
     window.addEventListener("message", event => {
       if (event.source !== frame.contentWindow) return;
       const host = (() => { try { return new URL(event.origin).hostname; } catch { return ""; } })();
