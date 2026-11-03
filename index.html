@@ -619,6 +619,11 @@
     @media (max-width: 620px) {
       .event-entry, .event-entry:nth-child(odd) { grid-template-columns: 1fr; gap: 2px; }
     }
+
+    .tool-console.anonymous .tool-console-dot { background: #e5a04c; }
+    .text-input { background: #171b21; border: 1px solid #343b45; border-radius: 8px; color: #d0d7e2; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .text-input::placeholder { color: #8995a5; }
+    .text-input:focus { outline: 1px solid #778595; border-color: #778595; }
 </style>
 
   <script>
@@ -759,7 +764,7 @@
               <span class="event-symbol">↺</span><span><span class="event-title">Reset interactions</span><span class="event-description">Clear all Supabase interaction records for this account</span></span>
             </button>
           </div>
-          <div class="tool-console" aria-label="Tools console">
+          <div class="tool-console anonymous" aria-label="Tools console">
             <div class="tool-console-heading"><span class="tool-console-dot"></span>Console <span class="tool-console-label">AUTH0 / SUPABASE</span></div>
             <div id="supabaseTestResult" class="tool-console-output" role="status" aria-live="polite">Unavailable while anonymous</div>
           </div>
@@ -993,6 +998,7 @@
           : "Unavailable while anonymous";
       }
       $("authStatus").classList.toggle("authenticated", Boolean(user));
+      $("supabaseTestResult").closest(".tool-console").classList.toggle("anonymous", !user);
       $("authStatusText").textContent = user ? (user.email || user.name || user.sub || "Signed in") : "Anonymous";
       updateAuthProfile(user);
       ["testSupabaseButton", "resetInteractionsButton"].forEach(id => $(id).disabled = !user || state.interactionTestBusy);
