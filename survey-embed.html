@@ -385,7 +385,12 @@
       nextFrame.setAttribute("loading", "eager");
       nextFrame.addEventListener("load", onFrameLoad);
       nextFrame.src = url;
-      frame.replaceWith(nextFrame);
+      if (frame) frame.replaceWith(nextFrame);
+      else {
+        const placeholder = shell.querySelector(".embed-empty");
+        if (placeholder) placeholder.replaceWith(nextFrame);
+        else shell.append(nextFrame);
+      }
       frame = nextFrame;
     }
     document.getElementById("loadButton").addEventListener("click", () => {
@@ -418,22 +423,6 @@
       frame = null;
       setFeedback("Embed code and preview cleared.", false);
     });
-    // Restore the iframe after Clear when a new survey is submitted.
-    const originalLoadSurvey = loadSurvey;
-    loadSurvey = function (url) {
-      if (!frame) {
-        const placeholder = shell.querySelector(".embed-empty");
-        const nextFrame = document.createElement("iframe");
-        nextFrame.id = "alchemer-embed";
-        nextFrame.className = "embed-frame";
-        nextFrame.title = "Alchemer embedded survey";
-        nextFrame.setAttribute("scrolling", "auto");
-        if (placeholder) placeholder.replaceWith(nextFrame);
-        else shell.append(nextFrame);
-        frame = nextFrame;
-      }
-      originalLoadSurvey(url);
-    };
     frame.addEventListener("load", onFrameLoad);
     window.addEventListener("message", event => {
       if (!frame || event.source !== frame.contentWindow) return;
