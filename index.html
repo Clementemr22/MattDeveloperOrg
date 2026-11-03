@@ -689,6 +689,12 @@
       .global-auth { top: 14px; right: 14px; }
       .button:not(.event-button) { padding: 7px 10px; }
     }
+
+    /* Lower-contrast controls */
+    .panel-heading { background: #2d323a; border-bottom-color: #3b424b; }
+    .event-button, .button-secondary { background: #30353d; border-color: #434a55; }
+    .event-button:hover, .button-secondary:hover { background: #393f49; border-color: #687381; }
+    .event-symbol { background: #353b45; }
 </style>
 
   <script>
@@ -899,17 +905,6 @@
       </div>
     </section>
 
-    <section class="panel inspector-panel">
-      <div class="panel-heading"><div><h2>Session Inspector</h2><p>Current page session details; values reflect confirmed local state.</p></div><button class="button button-secondary" id="refreshInspector" type="button">Refresh</button></div>
-      <div class="inspector-grid">
-        <div><span class="inspector-label">Authentication</span><code id="inspectorAuth">Checking…</code></div>
-        <div><span class="inspector-label">Auth0 User ID</span><code id="inspectorUser">Anonymous</code></div>
-        <div><span class="inspector-label">Alchemer Conversation ID</span><code id="inspectorConversation">Not reported</code></div>
-        <div><span class="inspector-label">SDK / Conversation</span><code id="inspectorSdk">Loading</code></div>
-        <div><span class="inspector-label">Requested person data</span><pre id="inspectorData">None</pre></div>
-      </div>
-      <button class="button button-secondary" id="copyInspector" type="button">Copy Session Details</button>
-    </section>
     <footer class="footer">Matt's Web App · Apptentive Web SDK</footer>
   </main>
 
@@ -1437,8 +1432,6 @@
 
       $("clearHistoryButton").addEventListener("click", clearEventHistory);
       $("copyHistoryButton").addEventListener("click", () => copyText(state.logEntries.map(e => e.time + " [" + e.type + "] " + e.message).join("\n"), "Event history"));
-      $("copyInspector").addEventListener("click", () => copyText(sessionReport(), "Session details"));
-      $("refreshInspector").addEventListener("click", refreshInspector);
       ["historySearch", "historyFilter", "hideStartup"].forEach(id => $(id).addEventListener("input", applyHistoryFilters));
       $("sidebarToggle").addEventListener("click", () => {
         const collapsed = document.body.classList.toggle("sidebar-collapsed");
