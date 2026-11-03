@@ -581,6 +581,44 @@
     .panel-heading { background: #252a32; border-bottom-color: #393f49; }
     .event-button { background: #343a44; }
     .event-button:hover { background: #404753; }
+
+    /* Unified, text-only console surfaces */
+    .event-list {
+      display: block;
+      background: #171b21;
+      border: 1px solid #343b45;
+      border-radius: 8px;
+      padding: 12px 14px;
+      max-height: 420px;
+      overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }
+    .event-entry,
+    .event-entry:nth-child(odd) {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 12px;
+      padding: 7px 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      font-size: .78rem;
+      line-height: 1.55;
+    }
+    .event-entry:last-child { padding-bottom: 7px; }
+    .event-time { color: #8995a5; font: inherit; font-size: .75rem; padding: 0; }
+    .event-type { color: #b0bcca; font-weight: 650; margin-bottom: 2px; }
+    .event-message { color: #d0d7e2; }
+    .event-list .empty-state { color: #8995a5; padding: 6px 0; font-family: inherit; font-size: .8rem; }
+    .tool-console { background: #171b21; border: 1px solid #343b45; border-radius: 8px; }
+    .tool-console-heading { background: transparent; border-bottom: 1px solid #343b45; padding: 10px 14px; color: #aeb9c8; }
+    .tool-console-label { color: #8995a5; }
+    .tool-console-output { background: transparent; color: #d0d7e2; padding: 14px; line-height: 1.65; }
+    .tool-console-output[data-tone="success"] { color: #a6dfbd; }
+    .tool-console-output[data-tone="error"] { color: #f1a0a9; }
+    @media (max-width: 620px) {
+      .event-entry, .event-entry:nth-child(odd) { grid-template-columns: 1fr; gap: 2px; }
+    }
 </style>
 
   <script>
