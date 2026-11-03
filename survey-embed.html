@@ -315,6 +315,13 @@
       .global-auth .anonymous-pill, .global-auth .auth-indicator { max-width: 68px; }
       .brand .top-link { padding: 8px 7px; font-size: .75rem; }
     }
+
+    @media (max-width: 900px) {
+      .global-auth .anonymous-pill:not(.authenticated) #authStatusText { display: none; }
+      .global-auth .anonymous-pill:not(.authenticated) { gap: 0; }
+      .global-auth .auth-indicator { font-size: 0; gap: 0; }
+      .global-auth .auth-indicator .auth-dot { display: inline-block; flex: 0 0 8px; }
+    }
 </style>
   <script src="https://api.alchemer.com/head/surveyjsscript"></script>
   <script>
