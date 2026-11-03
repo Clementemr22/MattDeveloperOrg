@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#74869a">
+  <meta name="theme-color" content="#20242d">
   <title>SDK Testing — Matt's Web App</title>
   <style>
     :root {
@@ -375,6 +375,101 @@
       .header-actions .button { flex: 1 1 auto; min-width: 0; }
       .status-grid { grid-template-columns: minmax(0, 1fr); }
     }
+
+    /* Dashboard theme */
+    :root { color-scheme: dark; --ink: #edf1f7; --muted: #a0a9bb; --line: #404652; --surface: #30353f; --canvas: #23262e; --sky: #344c63; --orange-wash: #51402f; --green: #5cdbac; --green-bg: #24483e; --amber: #f2bf6a; --red: #ff6676; --shadow: 0 6px 18px rgba(0,0,0,.12); }
+    body { background: #24272f; color: var(--ink); background-attachment: initial; }
+    .site-header { position: fixed; inset: 0 auto 0 0; width: 242px; background: #2d313b; border-right: 1px solid #424753; z-index: 20; }
+    .header-inner { width: 100%; min-height: 100%; padding: 24px 14px; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 30px; }
+    .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 2px 5px 22px; border-bottom: 1px solid #454a55; text-decoration: none; color: #fff; min-width: 0; }
+    .sidebar-brand img { width: 48px; height: 48px; border-radius: 11px; object-fit: contain; flex-shrink: 0; }
+    .sidebar-brand strong { display: block; font-size: .91rem; letter-spacing: -.02em; line-height: 1.3; }
+    .sidebar-brand small { display: block; font-size: .69rem; color: #aab4c4; line-height: 1.35; }
+    .brand { display: grid; gap: 6px; width: 100%; }
+    .brand .top-link, .brand-name.top-link { display: block; color: #aeb8c8; padding: 11px 13px; border-radius: 8px; font-weight: 550; font-size: .88rem; text-decoration: none; }
+    .brand .top-link:hover, .brand-name.top-link:hover { background: #3a404d; color: #fff; text-decoration: none; }
+    .brand .active-link { background: #414956; color: #fff; border-left: 3px solid #53baf1; }
+    .sidebar-account { margin-top: auto; padding: 18px 6px 0; border-top: 1px solid #454a55; }
+    .sidebar-caption { font-size: .68rem; letter-spacing: .12em; color: #929cad; margin-bottom: 9px; }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .anonymous-pill { color: #e5e9f1; width: 100%; overflow-wrap: anywhere; white-space: normal; font-size: .78rem; }
+    .page { width: auto; max-width: 1440px; margin: 0 0 0 242px; padding: 38px 32px 50px; }
+    .dashboard-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 27px; }
+    .dashboard-overline { font-size: .7rem; letter-spacing: .16em; color: #6dbce8; font-weight: 750; }
+    .dashboard-heading h1 { margin: 5px 0 4px; font-size: clamp(1.55rem, 2.5vw, 2rem); letter-spacing: -.035em; color: #f7f8fb; }
+    .dashboard-heading p { margin: 0; color: #a0a9bb; font-size: .83rem; }
+    .dashboard-environment { border: 1px solid #43574e; background: #2b4139; color: #83e2b0; padding: 8px 12px; border-radius: 8px; white-space: nowrap; font-size: .76rem; }
+    .status-grid { gap: 14px; margin-bottom: 20px; }
+    .status-card, .panel { background: #30353f; border: 1px solid #414753; border-radius: 9px; box-shadow: 0 4px 12px rgba(0,0,0,.11); }
+    .status-card:hover, .panel:hover { border-color: #535d6d; box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+    .status-card { padding: 18px; border-top: 2px solid #4a89ae; }
+    .status-top { margin-bottom: 10px; }
+    .status-label { color: #b6c0d0; font-size: .76rem; }
+    .status-value { color: #f3f6fa; font-size: 1rem; }
+    .status-detail { color: #9ba7b9; }
+    .tone-neutral { color: #bbc5d4; } .tone-good { color: #67d9a4; } .tone-warn { color: #f0c27b; } .tone-bad { color: #ff7887; }
+    .main-grid { margin-bottom: 16px; }
+    .stack { gap: 16px; }
+    .panel { padding: 0 18px 18px; overflow: hidden; }
+    .panel-heading { margin: 0 -18px 17px; padding: 13px 18px; background: #383e49; border-bottom: 1px solid #4a505d; align-items: center; }
+    .panel-heading h2 { color: #f4f6fa; font-size: .98rem; margin: 0 0 3px; }
+    .panel-heading p { color: #aab4c4; font-size: .77rem; }
+    .event-button { background: #363c47; color: #edf2f9; border-color: #515a68; border-radius: 7px; min-height: 65px; }
+    .event-button:hover { background: #414b59; border-color: #67b7e8; }
+    .event-description { color: #a9b6c8; }
+    .event-symbol { display: grid; color: #73c8ff; background: #30495d; border-radius: 8px; }
+    .reset-button:not(:disabled):hover { background: #5c303a; border-color: #ff6777; color: #fff; }
+    .reset-button:not(:disabled):hover .event-symbol { background: #753540; color: #ffadb5; }
+    .tool-console { background: #272c35; border-color: #444c59; border-radius: 7px; }
+    .tool-console-heading { background: #343b47; color: #c9d3e2; border-color: #444c59; }
+    .tool-console-label { color: #a1adbd; }
+    .tool-console-output { color: #c9d3e2; }
+    .tool-console-output[data-tone="success"] { color: #84e6b5; }
+    .tool-console-output[data-tone="error"] { color: #ff8996; }
+    .text-input { background: #272c35; color: #f3f6fb; border-color: #515a68; border-radius: 7px; }
+    .text-input::placeholder { color: #909db0; }
+    .button-secondary { background: #414854; border-color: #5b6574; color: #f0f4fa; }
+    .button-secondary:hover { background: #505b69; border-color: #7a899c; }
+    .helper { color: #a4afc0; }
+    .event-entry { border-color: #444b56; }
+    .event-entry:nth-child(odd) { background: #343a45; }
+    .event-entry { padding: 10px 12px; border-radius: 4px; grid-template-columns: 90px minmax(0,1fr); }
+    .event-time { color: #a4b0c1; }
+    .event-type { color: #80c6f4; }
+    .event-message { color: #d0d7e2; }
+    .empty-state { color: #a4afc0; }
+    .notice { display: block; background: #373c48; border-color: #505968; color: #bdc7d6; }
+    .notice strong { color: #f0c27b; }
+    .footer { display: block; color: #8995a8; }
+    .toast { background: #363e49; border-color: #566171; color: #f3f6fa; }
+    .toast span { color: #c3cedd; }
+    @media (min-width: 1080px) {
+      .main-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+      .main-grid .stack { display: contents; }
+    }
+    @media (max-width: 900px) {
+      .site-header { position: relative; width: 100%; border-right: 0; border-bottom: 1px solid #444b57; }
+      .header-inner { min-height: 0; padding: 12px 20px; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; }
+      .sidebar-brand { border: 0; padding: 0; }
+      .brand { display: flex; width: auto; gap: 5px; }
+      .sidebar-account { margin: 0 0 0 auto; padding: 0; border: 0; }
+      .header-actions { justify-content: flex-end; }
+      .anonymous-pill { width: auto; }
+      .page { width: auto; margin: 0; padding: 28px 20px 40px; }
+      .dashboard-heading { align-items: flex-start; }
+    }
+    @media (max-width: 620px) {
+      .header-inner { align-items: flex-start; }
+      .sidebar-brand { width: 100%; }
+      .brand { width: 100%; }
+      .sidebar-account { margin: 0; width: 100%; }
+      .header-actions { justify-content: flex-start; }
+      .dashboard-heading { flex-direction: column; gap: 10px; }
+      .page { padding: 22px 14px 36px; }
+      .status-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .event-entry { grid-template-columns: 1fr; gap: 3px; }
+    }
+
   </style>
 
   <script>
@@ -425,26 +520,30 @@
 <body>
   <header class="site-header">
     <div class="header-inner">
-      <div class="brand">
-        <a class="brand-name top-link" href="index.html">SDK Testing</a>
-        <a class="top-link" href="survey-embed.html">Survey Embed</a>
-      </div>
-      <div class="header-actions">
-        <span class="anonymous-pill" id="authStatus"><span class="dot"></span><span id="authStatusText">Signed out</span></span>
-        <button class="button button-secondary button-small" id="loginButton" type="button">Log In</button>
-        <button class="button button-secondary button-small" id="signupButton" type="button">Sign Up</button>
-        <button class="button button-secondary button-small" id="logoutButton" type="button" hidden>Log Out</button>
+      <a class="sidebar-brand" href="index.html">
+        <img src="./Lucario-Icon.png" alt="" width="48" height="48">
+        <span><strong>Matt's Web App</strong><small>Web - Matt's Test Org</small></span>
+      </a>
+      <nav class="brand" aria-label="Main navigation">
+        <a class="brand-name top-link active-link" href="index.html">◫ &nbsp; Dashboard</a>
+        <a class="top-link" href="survey-embed.html">▤ &nbsp; Survey Embed</a>
+      </nav>
+      <div class="sidebar-account">
+        <div class="sidebar-caption">ACCOUNT</div>
+        <div class="header-actions">
+          <span class="anonymous-pill" id="authStatus"><span class="dot"></span><span id="authStatusText">Signed out</span></span>
+          <button class="button button-secondary button-small" id="loginButton" type="button">Log In</button>
+          <button class="button button-secondary button-small" id="signupButton" type="button">Sign Up</button>
+          <button class="button button-secondary button-small" id="logoutButton" type="button" hidden>Log Out</button>
+        </div>
       </div>
     </div>
   </header>
 
   <main class="page">
-    <section class="hero">
-      <img class="hero-logo" src="./Lucario-Icon.png" alt="Lucario" width="56" height="56">
-      <div class="hero-text">
-        <h1>Matt's Web App</h1>
-        <p class="hero-subtitle">Web - Matt's Test Org</p>
-      </div>
+    <section class="dashboard-heading">
+      <div><span class="dashboard-overline">OVERVIEW</span><h1>SDK Testing Dashboard</h1><p>Alchemer Digital · Auth0 · Supabase</p></div>
+      <span class="dashboard-environment">● &nbsp; Testing environment</span>
     </section>
 
     <section class="status-grid" aria-label="SDK status">
