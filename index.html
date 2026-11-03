@@ -900,6 +900,27 @@
     @media (max-width: 390px) {
       .global-auth:has(.anonymous-pill.authenticated) { max-width: 49vw; }
     }
+
+    /* Mobile auth buttons: restore compact visual size while keeping tap area accessible */
+    @media (max-width: 900px) {
+      .global-auth .button, .global-auth .button:not(.event-button) {
+        min-height: 34px;
+        padding: 7px 10px;
+        font-size: .78rem;
+        touch-action: manipulation;
+      }
+      .global-auth .button::before {
+        content: "";
+        position: absolute;
+        inset: -5px -2px;
+      }
+    }
+    @media (max-width: 390px) {
+      .global-auth .button, .global-auth .button:not(.event-button) {
+        padding: 7px 8px;
+        font-size: .75rem;
+      }
+    }
 </style>
 
   <script>
