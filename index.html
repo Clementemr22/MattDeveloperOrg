@@ -795,6 +795,13 @@
     html[data-theme="light"] .panel-heading { background: #fff; }
     html[data-theme="light"] .text-input, html[data-theme="light"] .url-input,
     html[data-theme="light"] .event-list, html[data-theme="light"] .tool-console { background: #f3f5f8; }
+
+    /* Moon left, sun right; only the unselected option is visible */
+    .theme-toggle .theme-moon, .theme-toggle .theme-sun { display: inline-flex; align-items: center; justify-content: center; width: 14px; }
+    html[data-theme="dark"] .theme-toggle .theme-moon { visibility: hidden; }
+    html[data-theme="dark"] .theme-toggle .theme-sun { visibility: visible; }
+    html[data-theme="light"] .theme-toggle .theme-sun { visibility: hidden; }
+    html[data-theme="light"] .theme-toggle .theme-moon { visibility: visible; }
 </style>
 
   <script>
@@ -858,11 +865,11 @@
         <span><strong>Matt's Web App</strong><small>Web - Matt's Test Org</small></span>
       </a>
       <nav class="brand" aria-label="Main navigation">
-        <a class="brand-name top-link active-link" href="index.html">◫ &nbsp; Dashboard</a>
+        <a class="brand-name top-link active-link" href="index.html">◫ &nbsp; Web SDK</a>
         <a class="top-link" href="survey-embed.html">▤ &nbsp; Survey Embed</a>
       </nav>
       <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" title="Toggle sidebar">☰ <span class="sidebar-toggle-text">Collapse sidebar</span></button>
-      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" aria-pressed="false" title="Switch theme"><span class="theme-track" aria-hidden="true"><span class="theme-sun">☀</span><span class="theme-moon">☾</span><span class="theme-thumb"></span></span></button>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" aria-pressed="false" title="Switch theme"><span class="theme-track" aria-hidden="true"><span class="theme-moon">☾</span><span class="theme-sun">☀</span><span class="theme-thumb"></span></span></button>
     </div>
   </header>
 
