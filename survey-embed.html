@@ -224,6 +224,28 @@
       body.sidebar-collapsed .brand .top-link::first-letter { font-size: 1.2rem; }
       body.sidebar-collapsed .sidebar-toggle { text-align: center; }
     }
+
+    /* Minimal sun/moon slider with no accompanying label */
+    .theme-toggle, html[data-theme="light"] .theme-toggle { width: auto; align-self: flex-start; padding: 6px 10px; background: transparent; border: 0; }
+    .theme-toggle .theme-track { width: 49px; height: 25px; display: flex; justify-content: space-between; align-items: center; padding: 0 5px; box-sizing: border-box; background: #444c58; border-color: #677383; }
+    .theme-toggle .theme-sun, .theme-toggle .theme-moon { position: relative; z-index: 2; font-size: 12px; line-height: 1; color: #d5deea; }
+    .theme-toggle .theme-thumb { width: 19px; height: 19px; top: 2px; left: 2px; background: #e9edf4; opacity: .95; }
+    html[data-theme="light"] .theme-toggle .theme-track { background: #dce5ef; border-color: #b5c2d1; }
+    html[data-theme="light"] .theme-toggle .theme-thumb { transform: translateX(24px); background: #fff; box-shadow: 0 1px 3px rgba(37,52,73,.25); }
+    html[data-theme="light"] .theme-toggle .theme-sun, html[data-theme="light"] .theme-toggle .theme-moon { color: #506177; }
+    @media (min-width: 901px) { body.sidebar-collapsed .theme-toggle { padding: 7px 0; width: 100%; justify-content: center; } }
+    /* White interactive surfaces; preserve shaded text inputs and terminal consoles */
+    html[data-theme="light"] .button, html[data-theme="light"] .button-secondary,
+    html[data-theme="light"] .event-button, html[data-theme="light"] .sidebar-toggle,
+    html[data-theme="light"] .brand .active-link, html[data-theme="light"] .event-symbol {
+      background: #fff; color: #2e3a4b; border-color: #d5dce5;
+    }
+    html[data-theme="light"] .button:hover:not(:disabled), html[data-theme="light"] .button-secondary:hover:not(:disabled),
+    html[data-theme="light"] .event-button:hover, html[data-theme="light"] .sidebar-toggle:hover,
+    html[data-theme="light"] .brand .top-link:hover { background: #f5f7fa; border-color: #becad7; }
+    html[data-theme="light"] .panel-heading { background: #fff; }
+    html[data-theme="light"] .text-input, html[data-theme="light"] .url-input,
+    html[data-theme="light"] .event-list, html[data-theme="light"] .tool-console { background: #f3f5f8; }
 </style>
   <script src="https://api.alchemer.com/head/surveyjsscript"></script>
   <script>
@@ -247,7 +269,7 @@
         <a class="top-link active-link" href="./survey-embed.html" aria-current="page">▤ &nbsp; Survey Embed</a>
       </nav>
       <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-expanded="true">☰ <span class="sidebar-toggle-text">Collapse sidebar</span></button>
-      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☀</span><span class="theme-track" aria-hidden="true"><span class="theme-thumb"></span></span><span class="theme-label">Light mode</span></button>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" aria-pressed="false" title="Switch theme"><span class="theme-track" aria-hidden="true"><span class="theme-sun">☀</span><span class="theme-moon">☾</span><span class="theme-thumb"></span></span></button>
     </div>
   </header>
   <div class="global-auth" aria-label="Authentication unavailable on Survey Embed">
@@ -258,7 +280,7 @@
   </div>
   <main class="page">
     <section class="heading">
-      <div><h1>Survey Embed Dashboard</h1><p>Preview and inspect embedded Alchemer surveys</p></div>
+      <div><h1>Survey Embed Testing</h1><p>Preview and inspect embedded Alchemer surveys</p></div>
       <span class="environment">● &nbsp; Testing environment</span>
     </section>
     <div class="stats">
@@ -400,8 +422,6 @@
       }
       function apply(theme) {
         document.documentElement.dataset.theme = theme;
-        button.querySelector(".theme-icon").textContent = theme === "dark" ? "☀" : "☾";
-        button.querySelector(".theme-label").textContent = theme === "dark" ? "Light mode" : "Dark mode";
         button.setAttribute("aria-label", "Switch to " + (theme === "dark" ? "light" : "dark") + " mode");
         button.title = "Switch to " + (theme === "dark" ? "light" : "dark") + " mode";
         button.setAttribute("aria-pressed", String(theme === "light"));
