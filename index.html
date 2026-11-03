@@ -879,6 +879,27 @@
       .global-auth .button, .global-auth .button:not(.event-button) { padding: 9px 8px; }
       .sidebar-brand { max-width: calc(100% - 174px); }
     }
+
+    /* Truncate authenticated mobile identity without overlapping the app brand */
+    @media (max-width: 900px) {
+      .global-auth:has(.anonymous-pill.authenticated) {
+        max-width: min(52vw, 225px);
+        min-width: 0;
+      }
+      .global-auth .anonymous-pill.authenticated {
+        display: flex; align-items: center; flex: 1 1 auto;
+        min-width: 0; max-width: none; overflow: hidden;
+      }
+      .global-auth .anonymous-pill.authenticated #authStatusText {
+        display: block; min-width: 0; max-width: 100%;
+        overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+      }
+      .global-auth .anonymous-pill.authenticated .dot { flex: 0 0 auto; }
+      .global-auth #logoutButton { flex: 0 0 auto; }
+    }
+    @media (max-width: 390px) {
+      .global-auth:has(.anonymous-pill.authenticated) { max-width: 49vw; }
+    }
 </style>
 
   <script>
