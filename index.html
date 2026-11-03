@@ -746,6 +746,33 @@
     html[data-theme="light"] .toast span { color: #526074; }
     html[data-theme="light"] .global-auth .button:disabled { background: #e9edf3; color: #7b8798; border-color: #cfd8e3; }
     @media (max-width: 620px) { .theme-toggle .theme-label { display: none; } .theme-toggle { padding: 7px 9px; } }
+
+    /* Compact sidebar theme switch and white light-mode headers */
+    .header-inner { gap: 18px; }
+    .brand { margin-bottom: 10px; }
+    .theme-toggle {
+      align-self: stretch; display: flex; justify-content: flex-start; align-items: center;
+      gap: 9px; width: 100%; min-height: 34px; padding: 5px 10px;
+      border: 0; background: transparent; color: #b7c1ce; border-radius: 8px;
+      font-size: .76rem; font-weight: 500; cursor: pointer;
+    }
+    .theme-toggle:hover { background: #30353d; }
+    .theme-toggle .theme-icon { font-size: .85rem; width: 15px; }
+    .theme-toggle .theme-track { position: relative; width: 33px; height: 18px; flex-shrink: 0; border-radius: 20px; background: #4b5360; border: 1px solid #66707e; transition: background .18s ease; }
+    .theme-toggle .theme-thumb { position: absolute; left: 2px; top: 2px; width: 12px; height: 12px; background: #e6eaf0; border-radius: 50%; transition: transform .18s ease; }
+    html[data-theme="light"] .theme-toggle .theme-track { background: #a8b7ca; border-color: #91a3b8; }
+    html[data-theme="light"] .theme-toggle .theme-thumb { transform: translateX(15px); background: #fff; }
+    html[data-theme="light"] .panel-heading { background: #fff; border-bottom-color: #dce2e9; }
+    html[data-theme="light"] .theme-toggle { background: transparent; border: 0; color: #526074; }
+    html[data-theme="light"] .theme-toggle:hover { background: #e6ebf2; }
+    @media (min-width: 901px) {
+      body.sidebar-collapsed .theme-toggle { padding: 8px 3px; justify-content: center; flex-wrap: wrap; gap: 5px; }
+      body.sidebar-collapsed .theme-toggle .theme-label { display: none; }
+    }
+    @media (max-width: 620px) {
+      .theme-toggle { width: auto; align-self: flex-start; }
+      .theme-toggle .theme-label { display: inline; }
+    }
 </style>
 
   <script>
@@ -813,11 +840,12 @@
         <a class="top-link" href="survey-embed.html">▤ &nbsp; Survey Embed</a>
       </nav>
       <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" title="Toggle sidebar">☰ <span class="sidebar-toggle-text">Collapse sidebar</span></button>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☀</span><span class="theme-track" aria-hidden="true"><span class="theme-thumb"></span></span><span class="theme-label">Light mode</span></button>
     </div>
   </header>
 
   <div class="global-auth" aria-label="Account actions">
-    <button class="theme-toggle" id="themeToggle" type="button"><span class="theme-icon" aria-hidden="true">☀</span><span class="theme-label">Light mode</span></button>
+    
     <span class="anonymous-pill" id="authStatus"><span class="dot"></span><span id="authStatusText">Anonymous</span></span>
     <button class="button button-secondary button-small" id="loginButton" type="button">Log In</button>
     <button class="button button-secondary button-small" id="signupButton" type="button">Sign Up</button>
@@ -1612,6 +1640,7 @@
         button.querySelector(".theme-label").textContent = theme === "dark" ? "Light mode" : "Dark mode";
         button.setAttribute("aria-label", "Switch to " + (theme === "dark" ? "light" : "dark") + " mode");
         button.title = "Switch to " + (theme === "dark" ? "light" : "dark") + " mode";
+        button.setAttribute("aria-pressed", String(theme === "light"));
       }
       apply(document.documentElement.dataset.theme);
       button.addEventListener("click", function () {
