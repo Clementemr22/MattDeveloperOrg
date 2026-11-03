@@ -523,7 +523,19 @@
       .dashboard-heading { margin-bottom: 28px; }
     }
 
-  </style>
+  
+    /* Floating sidebar: same page background, no enclosing rail */
+    .site-header { background: transparent; border-right: 0; }
+    .sidebar-brand { border-bottom: 0; padding-bottom: 0; }
+    .header-inner { padding-left: 22px; padding-right: 22px; }
+    .brand .active-link { border-left: 0; background: #30343d; }
+    .brand .top-link, .brand-name.top-link { border-radius: 9px; }
+    @media (max-width: 900px) {
+      .site-header { border-bottom: 0; }
+      .header-inner { padding-left: 20px; padding-right: 20px; }
+    }
+
+</style>
 
   <script>
     // Testing mode: discard only recognizable Apptentive localStorage entries
@@ -595,7 +607,7 @@
       </div>
     </div>
     <section class="dashboard-heading">
-      <div><span class="dashboard-overline">OVERVIEW</span><h1>SDK Testing Dashboard</h1><p>Alchemer Digital · Auth0 · Supabase</p></div>
+      <div><h1>SDK Testing Dashboard</h1><p>Alchemer Digital · Auth0 · Supabase</p></div>
       <span class="dashboard-environment">● &nbsp; Testing environment</span>
     </section>
 
@@ -646,11 +658,7 @@
               <span class="event-symbol">☰</span><span><span class="event-title">Message Center</span><span class="event-description">Open if configured and available</span></span>
             </button>
           </div>
-          <div class="notice">
-            <strong>Interaction reminder</strong>
-            Sending an event does not guarantee that an interaction appears. The event name and its targeting, campaign rules, and frequency limits must match your Apptentive configuration.
-          </div>
-        </section>
+</section>
 
         <section class="panel">
           <div class="panel-heading">
@@ -670,7 +678,7 @@
           </div>
           <div class="tool-console" aria-label="Tools console">
             <div class="tool-console-heading"><span class="tool-console-dot"></span>Console <span class="tool-console-label">AUTH0 / SUPABASE</span></div>
-            <div id="supabaseTestResult" class="tool-console-output" role="status" aria-live="polite">Sign in with Auth0 to use these tools.</div>
+            <div id="supabaseTestResult" class="tool-console-output" role="status" aria-live="polite">Unavailable while anonymous</div>
           </div>
         </section>
 
@@ -898,8 +906,8 @@
         const result = $("supabaseTestResult");
         result.dataset.tone = "";
         result.textContent = user
-          ? "Signed in. Choose a tool above to view results."
-          : "Sign in with Auth0 to use these tools.";
+          ? "Signed in"
+          : "Unavailable while anonymous";
       }
       $("authStatus").classList.toggle("authenticated", Boolean(user));
       $("authStatusText").textContent = user ? (user.email || user.name || "Authenticated") : "Signed out";
@@ -987,7 +995,7 @@
       const result = $("supabaseTestResult");
       if (!state.authReady || !state.authUser || !state.auth0Client) {
         result.dataset.tone = "error";
-        result.textContent = "Sign in with Auth0 to use these tools.";
+        result.textContent = "Unavailable while anonymous";
         return;
       }
       if (state.interactionTestBusy) return;
