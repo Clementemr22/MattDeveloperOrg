@@ -559,6 +559,14 @@
       .sidebar-brand { padding-right: 140px; }
       .page { padding-top: 26px; }
     }
+
+    .global-auth .anonymous-pill { display: inline-flex; align-items: center; gap: 8px; color: #c9d1dd; font-size: .82rem; max-width: 280px; }
+    .global-auth .anonymous-pill .dot { flex-shrink: 0; width: 8px; height: 8px; background: #e5a04c; }
+    .global-auth .anonymous-pill.authenticated .dot { background: #58d69a; }
+    .global-auth #authStatusText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 620px) {
+      .global-auth .anonymous-pill { max-width: 120px; font-size: .73rem; }
+    }
 </style>
 
   <script>
@@ -622,6 +630,7 @@
   </header>
 
   <div class="global-auth" aria-label="Account actions">
+    <span class="anonymous-pill" id="authStatus"><span class="dot"></span><span id="authStatusText">Anonymous</span></span>
     <button class="button button-secondary button-small" id="loginButton" type="button">Log In</button>
     <button class="button button-secondary button-small" id="signupButton" type="button">Sign Up</button>
     <button class="button button-secondary button-small" id="logoutButton" type="button" hidden>Log Out</button>
@@ -931,6 +940,8 @@
           ? "Signed in"
           : "Unavailable while anonymous";
       }
+      $("authStatus").classList.toggle("authenticated", Boolean(user));
+      $("authStatusText").textContent = user ? (user.email || user.name || user.sub || "Signed in") : "Anonymous";
       updateAuthProfile(user);
       ["testSupabaseButton", "resetInteractionsButton"].forEach(id => $(id).disabled = !user || state.interactionTestBusy);
       $("loginButton").hidden = Boolean(user);
