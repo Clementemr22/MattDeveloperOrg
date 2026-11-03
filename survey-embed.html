@@ -100,6 +100,11 @@
     .panel-heading { background: #252a32; border-bottom-color: #393f49; }
     .event-button { background: #343a44; }
     .event-button:hover { background: #404753; }
+
+    .url-input { background: #171b21; border: 1px solid #343b45; border-radius: 8px; color: #d0d7e2; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .url-input::placeholder { color: #8995a5; }
+    .url-input:focus { outline: 1px solid #778595; border-color: #778595; }
+    .heading { margin-top: 4px; }
 </style>
   <script src="https://api.alchemer.com/head/surveyjsscript"></script>
 </head>
@@ -117,9 +122,8 @@
     </div>
   </header>
   <main class="page">
-    <div class="top-status"><span class="status-pill" id="loadPill" data-state="loading"><span class="status-dot"></span><span id="loadPillText">Loading iframe</span></span></div>
     <section class="heading">
-      <div><span class="overline">SURVEY TESTING</span><h1>Survey Embed Dashboard</h1><p>Preview and inspect embedded Alchemer surveys</p></div>
+      <div><h1>Survey Embed Dashboard</h1><p>Preview and inspect embedded Alchemer surveys</p></div>
       <span class="environment">● &nbsp; Testing environment</span>
     </section>
     <div class="stats">
@@ -198,8 +202,6 @@
     }
     function setLoading() {
       document.getElementById("frameState").textContent = "Loading";
-      document.getElementById("loadPill").dataset.state = "loading";
-      document.getElementById("loadPillText").textContent = "Loading iframe";
       loadStartedAt = performance.now();
     }
     function reload(url) {
@@ -230,8 +232,6 @@
     document.getElementById("clearLogButton").addEventListener("click", () => { log.replaceChildren(); addLog("SYSTEM","Activity log cleared."); });
     frame.addEventListener("load", () => {
       document.getElementById("frameState").textContent = "Load event received";
-      document.getElementById("loadPill").dataset.state = "ready";
-      document.getElementById("loadPillText").textContent = "Iframe load event";
       addLog("IFRAME","Load event received after " + Math.round(performance.now()-loadStartedAt) + "ms; survey content not verified.");
     });
     window.addEventListener("message", event => {
