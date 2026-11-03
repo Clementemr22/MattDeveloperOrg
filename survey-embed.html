@@ -105,6 +105,32 @@
     .url-input::placeholder { color: #8995a5; }
     .url-input:focus { outline: 1px solid #778595; border-color: #778595; }
     .heading { margin-top: 4px; }
+
+    /* Shared SDK dashboard layout and inactive account controls */
+    .global-auth { position: fixed; top: 18px; right: 28px; z-index: 100; display: flex; align-items: center; gap: 10px; }
+    .global-auth .button { padding: 7px 11px; min-height: 34px; font-size: .78rem; }
+    .global-auth .button:disabled { cursor: not-allowed; opacity: .48; background: #30353d; color: #b5beca; border-color: #434a55; }
+    .auth-indicator { display: inline-flex; align-items: center; gap: 8px; font-size: .82rem; color: #aab4c2; }
+    .auth-dot { width: 8px; height: 8px; border-radius: 50%; background: #e5a04c; }
+    .page { box-sizing: border-box; max-width: none; width: auto; margin-left: 242px; padding: 112px 52px 70px; }
+    .page > .heading, .page > .stats, .page > .panel, .page > .footer { width: 100%; max-width: 1320px; margin-left: auto; margin-right: auto; }
+    .heading { margin-bottom: 36px; }
+    .stats { margin-bottom: 34px; gap: 18px; }
+    .panel { background: #22262d; border-color: #3c424c; box-shadow: 0 10px 24px rgba(0,0,0,.28),0 3px 8px rgba(0,0,0,.16); }
+    .panel-heading { background: #2d323a; border-bottom-color: #3b424b; }
+    .button { background: #30353d; border-color: #434a55; padding: 7px 11px; min-height: 34px; font-size: .78rem; }
+    .button:hover:not(:disabled) { background: #393f49; border-color: #687381; }
+    @media (max-width: 900px) {
+      .page { margin-left: 0; padding: 90px 30px 50px; }
+      .global-auth { top: 16px; right: 20px; }
+      .sidebar-brand { padding-right: 175px; }
+    }
+    @media (max-width: 620px) {
+      .page { padding: 85px 16px 40px; }
+      .global-auth { top: 14px; right: 14px; gap: 6px; }
+      .global-auth .button { padding: 7px 9px; font-size: .75rem; }
+      .sidebar-brand { padding-right: 140px; }
+    }
 </style>
   <script src="https://api.alchemer.com/head/surveyjsscript"></script>
 </head>
@@ -121,6 +147,11 @@
       </nav>
     </div>
   </header>
+  <div class="global-auth" aria-label="Authentication unavailable on Survey Embed">
+    <span class="auth-indicator"><span class="auth-dot"></span>Anonymous</span>
+    <button class="button" type="button" disabled title="Sign in on the SDK Testing dashboard">Log In</button>
+    <button class="button" type="button" disabled title="Sign up on the SDK Testing dashboard">Sign Up</button>
+  </div>
   <main class="page">
     <section class="heading">
       <div><h1>Survey Embed Dashboard</h1><p>Preview and inspect embedded Alchemer surveys</p></div>
