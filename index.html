@@ -663,6 +663,32 @@
       body.sidebar-collapsed .sidebar-toggle { text-align: center; }
     }
     @media (max-width: 620px) { .inspector-grid { grid-template-columns: 1fr; } .quick-actions-label { width: 100%; } }
+
+    /* Compact controls, unified headers and unobstructed top account bar */
+    .panel-heading { background: #343a44; border-bottom-color: #454c58; }
+    .button:not(.event-button) { padding: 7px 11px; font-size: .78rem; min-height: 34px; width: auto; }
+    .event-button { min-height: 58px; padding: 10px 12px; }
+    .event-symbol { width: 36px; height: 36px; }
+    .global-auth { position: fixed; top: 18px; right: 28px; }
+    .page { box-sizing: border-box; max-width: none; width: auto; margin-left: 242px; padding: 112px 52px 70px; }
+    .page > .dashboard-heading, .page > .status-grid, .page > .main-grid,
+    .page > .panel, .page > .footer { width: 100%; max-width: 1320px; margin-left: auto; margin-right: auto; }
+    .page > .dashboard-heading { margin-bottom: 36px; }
+    .page > .status-grid { margin-bottom: 34px; }
+    .page > .main-grid { margin-bottom: 30px; }
+    .page > .panel { margin-bottom: 30px; }
+    @media (min-width: 901px) {
+      body.sidebar-collapsed .page { margin-left: 86px; }
+    }
+    @media (max-width: 900px) {
+      .page { margin-left: 0; padding: 90px 30px 50px; }
+      .global-auth { top: 16px; right: 20px; }
+    }
+    @media (max-width: 620px) {
+      .page { padding: 85px 16px 40px; }
+      .global-auth { top: 14px; right: 14px; }
+      .button:not(.event-button) { padding: 7px 10px; }
+    }
 </style>
 
   <script>
@@ -738,12 +764,6 @@
       <span class="dashboard-environment">● &nbsp; Testing environment</span>
     </section>
 
-    <section class="quick-actions" aria-label="Quick actions">
-      <span class="quick-actions-label">QUICK ACTIONS</span>
-      <button class="button button-secondary" id="quickMessageCenter" type="button" disabled>Message Center</button>
-      <button class="button button-secondary" id="quickClearHistory" type="button">Clear History</button>
-      <button class="button button-secondary" id="quickCopyReport" type="button">Copy Debug Report</button>
-    </section>
     <section class="status-grid" aria-label="SDK status">
       <article class="status-card">
         <div class="status-top"><span class="status-label">SDK status</span><span class="status-icon">⌁</span></div>
@@ -1015,13 +1035,13 @@
     }
 
     function enableSdkControls() {
-      document.querySelectorAll(".sdk-action, #messageCenterButton, #quickMessageCenter, #customEventForm button").forEach(button => {
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
         button.disabled = false;
       });
     }
 
     function disableSdkControls() {
-      document.querySelectorAll(".sdk-action, #messageCenterButton, #quickMessageCenter, #customEventForm button").forEach(button => {
+      document.querySelectorAll(".sdk-action, #messageCenterButton, #customEventForm button").forEach(button => {
         button.disabled = true;
       });
     }
@@ -1416,9 +1436,6 @@
       $("resetInteractionsButton").addEventListener("click", () => runInteractionTest("reset"));
 
       $("clearHistoryButton").addEventListener("click", clearEventHistory);
-      $("quickClearHistory").addEventListener("click", clearEventHistory);
-      $("quickMessageCenter").addEventListener("click", openMessageCenter);
-      $("quickCopyReport").addEventListener("click", () => copyText(sessionReport() + "\n\nRecent activity:\n" + state.logEntries.slice(0, 50).map(e => e.time + " [" + e.type + "] " + e.message).join("\n"), "Debug report"));
       $("copyHistoryButton").addEventListener("click", () => copyText(state.logEntries.map(e => e.time + " [" + e.type + "] " + e.message).join("\n"), "Event history"));
       $("copyInspector").addEventListener("click", () => copyText(sessionReport(), "Session details"));
       $("refreshInspector").addEventListener("click", refreshInspector);
