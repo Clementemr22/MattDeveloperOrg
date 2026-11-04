@@ -322,6 +322,19 @@
       .global-auth .auth-indicator { font-size: 0; gap: 0; }
       .global-auth .auth-indicator .auth-dot { display: inline-block; flex: 0 0 8px; }
     }
+
+    /* Consistent floating panel headings and clickable button elevation */
+    .panel { overflow: visible; padding-top: 22px; }
+    .panel-heading, html[data-theme="light"] .panel-heading {
+      background: transparent; border: 0; margin: 0 0 18px; padding: 0;
+    }
+    .panel-heading h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+    .panel-heading p { display: none; }
+    .button { box-shadow: 0 3px 7px rgba(0,0,0,.22), 0 1px 2px rgba(0,0,0,.15); transition: box-shadow .15s ease, transform .15s ease; }
+    .button:hover:not(:disabled) { box-shadow: 0 5px 12px rgba(0,0,0,.27); transform: translateY(-1px); }
+    .button:active:not(:disabled) { transform: translateY(0); }
+    html[data-theme="light"] .button { box-shadow: 0 3px 7px rgba(39,51,69,.16), 0 1px 2px rgba(39,51,69,.1); }
+    @media (max-width: 620px) { .panel { padding-top: 18px; } .panel-heading { margin-bottom: 14px; } }
 </style>
   <script src="https://api.alchemer.com/head/surveyjsscript"></script>
   <script>
@@ -364,7 +377,7 @@
       <div class="stat"><span class="stat-label">Survey name</span><span class="stat-value" id="surveyName">CSAT 5 Point Rating</span></div>
     </div>
     <section class="panel">
-      <div class="panel-heading"><h2>Embed Code</h2><p>Paste an Alchemer iframe embed snippet or survey URL, then load it below.</p></div>
+      <div class="panel-heading"><h2>Embed Code</h2></div>
       <label class="embed-label" for="embedCode">Survey embed code</label>
       <textarea class="embed-code" id="embedCode" rows="5" spellcheck="false" placeholder="Paste an Alchemer iframe embed snippet or HTTPS survey URL…">&lt;iframe src="https://survey.alchemer.com/s3/8795209/CSAT-5-Point-Rating" title="Alchemer survey"&gt;&lt;/iframe&gt;</textarea>
       <div class="controls embed-tools">
@@ -375,7 +388,7 @@
       <p class="helper" id="embedFeedback" role="status">Only HTTPS Alchemer survey URLs are supported. Embedded scripts are not executed.</p>
     </section>
     <section class="panel">
-      <div class="panel-heading"><h2>Survey Embed Area</h2><p>Preview the survey at the available page width.</p></div>
+      <div class="panel-heading"><h2>Survey Embed Area</h2></div>
       <div class="viewer">
         <div class="embed-shell" id="embedShell">
           <iframe id="alchemer-embed" class="embed-frame" src="https://survey.alchemer.com/s3/8795209/CSAT-5-Point-Rating" title="Alchemer embedded survey" scrolling="auto" loading="lazy"></iframe>
